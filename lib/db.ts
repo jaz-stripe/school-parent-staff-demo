@@ -1,3 +1,4 @@
+// lib/db.ts
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
@@ -40,8 +41,9 @@ async function initialiseDb(db: any) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       firstName TEXT,
       lastName TEXT,
-      parentID INTEGER,,
-      isOnboarded BOOLEAN DEFAULT 0
+      year INTEGER,
+      parentID INTEGER,
+      isOnboarded BOOLEAN DEFAULT 0,
       FOREIGN KEY(parentID) REFERENCES parent(id)
     );
 
@@ -50,54 +52,63 @@ async function initialiseDb(db: any) {
       firstName TEXT,
       lastName TEXT,
       email TEXT UNIQUE,
-      password TEXT
+      password TEXT,
+      emoji TEXT
     );
 
     CREATE TABLE IF NOT EXISTS subscription (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
       year INTEGER DEFAULT 0,
-      stripeProductId TEXT NOT NULL
+      stripeProductId TEXT NOT NULL,
+      UNIQUE(name, year)
     );
 
     CREATE TABLE IF NOT EXISTS subscription_price (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       subId INTEGER NOT NULL,
-      period TEXT NOT NULL UNIQUE,
-      stripePriceID TEXT NOT NULL
+      period TEXT NOT NULL,
+      stripePriceID TEXT NOT NULL,
+      FOREIGN KEY(subId) REFERENCES subscription(id),
+      UNIQUE(subId, period)
     );
 
     CREATE TABLE IF NOT EXISTS product (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
       type TEXT NOT NULL,
       stripeProductId TEXT NOT NULL,
-      stripePriceID TEXT NOT NULL
+      stripePriceID TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      UNIQUE(name, type)
     );
 
     CREATE TABLE IF NOT EXISTS parent_subscriptions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       parentId INTEGER NOT NULL,
-      productId INTEGER,
-      priceId INTEGER,
-      purchaseFor INTEGER,
+      productId INTEGER NOT NULL,
+      priceId INTEGER NOT NULL,
+      studentId INTEGER,
+      stripeSubscriptionId TEXT,
       description TEXT,
       purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(parentId) REFERENCES parent(id),
-      FOREIGN KEY(purchaseFor) REFERENCES student(id),
-      FOREIGN KEY (productId) REFERENCES subscription(id),
-      FOREIGN KEY (priceId) REFERENCES subscription_prices(id),
+      FOREIGN KEY(studentId) REFERENCES student(id),
+      FOREIGN KEY(productId) REFERENCES subscription(id),
+      FOREIGN KEY(priceId) REFERENCES subscription_price(id)
     );
 
     CREATE TABLE IF NOT EXISTS parent_purchases (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       parentId INTEGER NOT NULL,
-      productId INTEGER,
-      purchaseFor INTEGER,
+      productId INTEGER NOT NULL,
+      studentId INTEGER,
+      stripeInvoiceId TEXT,
       description TEXT,
       purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(parentId) REFERENCES parent(id),
-      FOREIGN KEY (productId) REFERENCES product(id)
+      FOREIGN KEY(productId) REFERENCES product(id),
+      FOREIGN KEY(studentId) REFERENCES student(id)
     );
   `);
   console.log('Database schema initialized');

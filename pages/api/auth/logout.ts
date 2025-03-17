@@ -1,10 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+// pages/api/auth/logout.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { removeAuthCookie } from '../../../lib/auth';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    res.setHeader('Set-Cookie', 'userEmail=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;');
-    res.status(200).json({ success: true, message: 'Logged out successfully' })
-  } else {
-    res.status(405).json({ success: false, message: 'Method not allowed' })
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method not allowed' });
+  }
+
+  try {
+    // Remove auth cookie
+    removeAuthCookie(res);
+    
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return res.status(500).json({ success: false, message: 'Server error during logout' });
   }
 }

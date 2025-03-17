@@ -1,0 +1,137 @@
+/* styles/Signup.module.css */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #ecf0f1;
+  padding: 1rem;
+}
+
+.signupBox {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.progressBar {
+  display: flex;
+  justify-content: space-between;
+  margin: 2rem 0;
+}
+
+.progressStep {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  color: #7f8c8d;
+  border-bottom: 2px solid #ddd;
+  font-size: 0.9rem;
+}
+
+.progressStep.active {
+  color: #2c3e50;
+  border-bottom-color: #3498db;
+  font-weight: bold;
+}
+
+.formContainer {
+  margin-top: 2rem;
+}
+
+.inputGroup {
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.inputGroup input,
+.inputGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.backButton {
+  background-color: #7f8c8d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.nextButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.backButton:hover {
+  background-color: #95a5a6;
+}
+
+.nextButton:hover {
+  background-color: #2980b9;
+}
+
+.error {
+  color: #e74c3c;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(231, 76, 60, 0.1);
+  border-left: 4px solid #e74c3c;
+}
+
+.frequencySelector {
+  margin-bottom: 2rem;
+}
+
+.frequencySelector label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.frequencySelector select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}

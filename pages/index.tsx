@@ -1,25 +1,24 @@
-// We want to clearly differentiate Parent and staff logins, 
-// both a parent and a staff login session need to be able to exist symaltaneously in different browser tabs
-// The Sign up button needs to be large and below the parent loging button
-// Loging in as staff, opens resutling page in a new tab
-
-
+// pages/index.tsx
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+import Image from 'next/image';
 import styles from '../styles/Login.module.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isParent, setIsParent] = useState(true);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
+    setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const endpoint = isParent ? '/api/auth/parent-login' : '/api/auth/staff-login';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -28,10 +27,13 @@ export default function Login() {
       const data = await response.json();
 
       if (data.success) {
-        // If login is successful, redirect to the main page
-        router.push('/main');
+        if (isParent) {
+          router.push('/parent-portal');
+        } else {
+          // Open staff portal in a new tab
+          window.open('/staff-portal', '_blank');
+        }
       } else {
-        // If login fails, display the error message
         setError(data.message || 'Invalid email or password');
       }
     } catch (error) {
@@ -40,12 +42,23 @@ export default function Login() {
     }
   };
 
+  const handleStaffLogin = () => {
+    setIsParent(false);
+    setEmail('mcgregor@garden.edu.au');
+    setPassword('password');
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.loginBox}>
         <div className={styles.logoContainer}>
-          <img src="/demo-logo.svg" alt="Demo Logo" className={styles.logo} />
+          <Image src="/public/school-logo.svg" alt="School Logo" width={200} height={100} />
         </div>
+        
+        <h1 className={styles.title}>
+          {isParent ? 'Parent Login' : 'Staff Login'}
+        </h1>
+        
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             type="email"
@@ -63,16 +76,37 @@ export default function Login() {
             required
             className={styles.input}
           />
+          
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.button}>Log in</button>
+          
+          <button type="submit" className={styles.button}>
+            {isParent ? 'Parent Login' : 'Staff Login'}
+          </button>
         </form>
-        <button 
-          onClick={() => router.push('/signup')} 
-          className={styles.signupButton}
-        >
-          New parent? Sign up now!
-        </button>
+        
+        {isParent ? (
+          <>
+            <button 
+              onClick={handleStaffLogin}
+              className={styles.switchButton}
+            >
+              Staff Login
+            </button>
+            // pages/index.tsx (continued)
+            <Link href="/sign-up" className={styles.signupButton}>
+              New parent? Sign up now!
+            </Link>
+          </>
+        ) : (
+          <button 
+            onClick={() => setIsParent(true)}
+            className={styles.switchButton}
+          >
+            Parent Login
+          </button>
+        )}
       </div>
     </div>
   );
 }
+
