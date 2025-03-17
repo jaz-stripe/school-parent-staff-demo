@@ -1,0 +1,151 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+  
+  .leftSection {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logoContainer {
+    position: relative;
+    margin-right: 2rem;
+  }
+  
+  .logoButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .navigation {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navItem {
+    color: #a0a0a0;
+    text-decoration: none;
+    margin-right: 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .navItem:hover {
+    color: #ffffff;
+  }
+  
+  .navItem.active {
+    color: #ffffff;
+    font-weight: 700;
+  }
+  
+  .premium {
+    color: #ffd700;
+  }
+  
+  .rightSection {
+    display: flex;
+    align-items: center;
+  }
+  
+  .userMenu {
+    position: relative;
+  }
+  
+  .avatarButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .dropdown {
+    position: absolute;
+    background-color: #333;
+    border-radius: 4px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .logoContainer .dropdown {
+    left: 0;
+    top: 100%;
+  }
+  
+  .userMenu .dropdown {
+    right: 0;
+    top: 100%;
+  }
+  
+  .dropdown button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .dropdown button:hover {
+    background-color: #555;
+  }
+  
+  .toggleSwitch {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .toggleSlider {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: .4s;
+    margin-right: 0.5rem;
+  }
+  
+  .toggleSlider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggleSlider {
+    background-color: #2196F3;
+  }
+  
+  input:checked + .toggleSlider:before {
+    transform: translateX(16px);
+  }
+  
+  .toggleSwitch input {
+    display: none;
+  }
+  
