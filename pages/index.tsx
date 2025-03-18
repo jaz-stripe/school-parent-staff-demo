@@ -52,7 +52,7 @@ export default function Login() {
     <div className={styles.container}>
       <div className={styles.loginBox}>
         <div className={styles.logoContainer}>
-          <Image src="/public/school-logo.svg" alt="School Logo" width={200} height={100} />
+          <Image src="/school-logo.png" alt="School Logo" width={200} height={200} />
         </div>
         
         <h1 className={styles.title}>

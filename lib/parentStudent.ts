@@ -135,26 +135,6 @@ export async function setParentPaymentMethod(parentId: number, paymentMethodId: 
   return await db.get('SELECT * FROM parent WHERE id = ?', [parentId]);
 }
 
-// Mark parent as onboarded
-export async function markParentOnboarded(parentId: number) {
-  const db = await getDb();
-  await db.run('UPDATE parent SET isOnboarded = 1 WHERE id = ?', [parentId]);
-  return await db.get('SELECT * FROM parent WHERE id = ?', [parentId]);
-}
-
-// Create setup intent for parent
-export async function createParentSetupIntent(parentId: number) {
-  const db = await getDb();
-  const parent = await db.get('SELECT * FROM parent WHERE id = ?', [parentId]);
-  
-  if (!parent || !parent.stripeCustomerId) {
-    throw new Error('Parent not found or has no Stripe customer ID');
-  }
-  
-  return await createSetupIntent(parent.stripeCustomerId);
-}
-
-// lib/parentStudent.ts (continued)
 // Get parent by ID
 export async function getParentById(parentId: number) {
     const db = await getDb();
@@ -165,31 +145,6 @@ export async function getParentById(parentId: number) {
   export async function getParentByEmail(email: string) {
     const db = await getDb();
     return await db.get('SELECT * FROM parent WHERE email = ?', [email]);
-  }
-  
-  // Update parent information
-  export async function updateParent(parentId: number, updatedData: Partial<{
-    firstName: string;
-    lastName: string;
-    email: string;
-    addressLine1: string;
-    addressLine2: string;
-    subsurb: string;
-    city: string;
-    postCode: string;
-    country: string;
-  }>) {
-    const db = await getDb();
-    
-    const setClause = Object.keys(updatedData)
-      .map(key => `${key} = ?`)
-      .join(', ');
-    
-    const values = [...Object.values(updatedData), parentId];
-    
-    await db.run(`UPDATE parent SET ${setClause} WHERE id = ?`, values);
-    
-    return await getParentById(parentId);
   }
   
   // Get staff by email

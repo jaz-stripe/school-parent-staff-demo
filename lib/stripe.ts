@@ -1,7 +1,7 @@
 // lib/stripe.ts
 import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from './config';
-import { getDb } from './db';
+import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from './config.ts';
+import { getDb } from './db.ts';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY as string, {
   apiVersion: '2023-10-16'
@@ -263,78 +263,6 @@ export async function addProductToParent(
   }
 }
 
-export async function createInvoiceItem(customerId: string, priceId: string, description?: string) {
-  try {
-    const invoiceItem = await stripe.invoiceItems.create({
-      customer: customerId,
-      price: priceId,
-      description
-    });
-    console.log(`Created invoice item: ${invoiceItem.id} for customer: ${customerId}`);
-    return invoiceItem;
-  } catch (error) {
-    console.error('Error creating invoice item:', error);
-    throw error;
-  }
-}
-
-export async function createInvoice(customerId: string, autoAdvance: boolean = true) {
-  try {
-    const invoice = await stripe.invoices.create({
-      customer: customerId,
-      auto_advance: autoAdvance,
-    });
-    
-    if (autoAdvance) {
-      await stripe.invoices.finalizeInvoice(invoice.id);
-      console.log(`Finalized invoice: ${invoice.id} for customer: ${customerId}`);
-    } else {
-      console.log(`Created draft invoice: ${invoice.id} for customer: ${customerId}`);
-    }
-    
-    return invoice;
-  } catch (error) {
-    console.error('Error creating invoice:', error);
-    throw error;
-  }
-}
-
-export async function createPaymentIntent(customerId: string, amount: number, currency: string = 'aud', paymentMethodId?: string) {
-  try {
-    const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
-      amount,
-      currency,
-      customer: customerId,
-    };
-    
-    if (paymentMethodId) {
-      paymentIntentParams.payment_method = paymentMethodId;
-      paymentIntentParams.confirm = true;
-      paymentIntentParams.off_session = true;
-    }
-    
-    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
-    console.log(`Created payment intent: ${paymentIntent.id} for customer: ${customerId}`);
-    return paymentIntent;
-  } catch (error) {
-    console.error('Error creating payment intent:', error);
-    throw error;
-  }
-}
-
-export async function retrievePaymentMethods(customerId: string, type: string = 'card') {
-  try {
-    const paymentMethods = await stripe.paymentMethods.list({
-      customer: customerId,
-      type
-    });
-    return paymentMethods;
-  } catch (error) {
-    console.error('Error retrieving payment methods:', error);
-    throw error;
-  }
-}
-
 export async function createCustomerPortalSession(customerId: string, returnUrl: string) {
   try {
     // Get or create portal configuration ID
@@ -564,21 +492,6 @@ export async function createSubscriptionForStudents(
     console.error('Error creating subscription for students:', error);
     throw error;
   }
-}
-
-// Get available payment method types for the customer's country
-export async function getPaymentMethodTypes(country: string = 'AU') {
-  // Default to common payment methods, but can be expanded based on country
-  const paymentMethodTypes = ['card'];
-  
-  // Add country-specific payment methods
-  if (country === 'AU') {
-    paymentMethodTypes.push('au_becs_debit');
-  } else if (country === 'NZ') {
-    paymentMethodTypes.push('nz_bank_account');
-  }
-  
-  return paymentMethodTypes;
 }
 
 export async function getOrCreatePortalConfiguration() {

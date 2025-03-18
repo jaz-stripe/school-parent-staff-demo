@@ -13,38 +13,6 @@ export async function getAllProducts(type?: string) {
   return await db.all('SELECT * FROM product');
 }
 
-// Get all subscriptions (tuition)
-export async function getAllSubscriptions(year?: number) {
-  const db = await getDb();
-  
-  let query = `
-    SELECT s.*, sp.id as priceId, sp.period, sp.stripePriceID
-    FROM subscription s
-    JOIN subscription_price sp ON s.id = sp.subId
-  `;
-  
-  let params: any[] = [];
-  
-  if (year) {
-    query += ' WHERE s.year = ?';
-    params.push(year);
-  }
-  
-  return await db.all(query, params);
-}
-
-// Get subscription by year and period
-export async function getSubscriptionByYearAndPeriod(year: number, period: string) {
-  const db = await getDb();
-  
-  return await db.get(`
-    SELECT s.*, sp.id as priceId, sp.period, sp.stripePriceID
-    FROM subscription s
-    JOIN subscription_price sp ON s.id = sp.subId
-    WHERE s.year = ? AND sp.period = ?
-  `, [year, period]);
-}
-
 // Create a tuition product
 export async function createTuitionProduct(name: string, year: number, amount: number) {
   const db = await getDb();
@@ -111,51 +79,6 @@ export async function createNonTuitionProduct(name: string, type: string, amount
   
   // Return the created product
   return await db.get('SELECT * FROM product WHERE id = ?', [lastID]);
-}
-
-// Get product by ID
-export async function getProductById(productId: number) {
-  const db = await getDb();
-  return await db.get('SELECT * FROM product WHERE id = ?', [productId]);
-}
-
-// Add subscription for a parent
-export async function addParentSubscription(
-  parentId: number,
-  productId: number,
-  priceId: number,
-  studentId: number | null,
-  stripeSubscriptionId: string,
-  description?: string
-) {
-  const db = await getDb();
-  
-  const { lastID } = await db.run(`
-    INSERT INTO parent_subscriptions (
-      parentId, productId, priceId, studentId, stripeSubscriptionId, description
-    ) VALUES (?, ?, ?, ?, ?, ?)
-  `, [parentId, productId, priceId, studentId, stripeSubscriptionId, description || null]);
-  
-  return await db.get('SELECT * FROM parent_subscriptions WHERE id = ?', [lastID]);
-}
-
-// Add purchase for a parent
-export async function addParentPurchase(
-  parentId: number,
-  productId: number,
-  studentId: number | null,
-  stripeInvoiceId: string,
-  description?: string
-) {
-  const db = await getDb();
-  
-  const { lastID } = await db.run(`
-    INSERT INTO parent_purchases (
-      parentId, productId, studentId, stripeInvoiceId, description
-    ) VALUES (?, ?, ?, ?, ?)
-  `, [parentId, productId, studentId, stripeInvoiceId, description || null]);
-  
-  return await db.get('SELECT * FROM parent_purchases WHERE id = ?', [lastID]);
 }
 
 // Get parent subscriptions

@@ -118,40 +118,6 @@ export async function getCurrentUser(req: NextApiRequest, role?: 'parent' | 'sta
     
     return null;
   }
-
-// export async function getCurrentUser(req: NextApiRequest) {
-//     const token = getAuthToken(req);
-    
-//     if (!token) return null;
-    
-//     const decoded: any = verifyToken(token);
-//     console.log('Token decoded:', decoded);
-    
-//     if (!decoded) return null;
-    
-//     try {
-//       // The token tells us the role - we trust this information
-//       const role = decoded.role;
-      
-//       if (role === 'parent') {
-//         const parent = await getParentByEmail(decoded.email);
-//         if (parent) {
-//           // Attach the role to the returned user object
-//           return { ...parent, role: 'parent' };
-//         }
-//       } else if (role === 'staff') {
-//         const staff = await getStaffByEmail(decoded.email);
-//         if (staff) {
-//           // Attach the role to the returned user object
-//           return { ...staff, role: 'staff' };
-//         }
-//       }
-//     } catch (error) {
-//       console.error('Error in getCurrentUser:', error);
-//     }
-    
-//     return null;
-//   }
   
 // Update the getAuthToken function to check both cookie types
 export function getAuthToken(req: NextApiRequest, role?: 'parent' | 'staff'): string | null {

@@ -45,7 +45,7 @@ export default function TopBar({ userEmoji, userName, role, onLogout }: TopBarPr
         )}
         <div className={styles.logoContainer}>
           <Link href={`/${role}-portal`}>
-            <Image src="/school-logo.svg" alt="School Logo" width={120} height={50} />
+            <Image src="/school-logo.png" alt="School Logo" width={50} height={50} />
           </Link>
         </div>
         

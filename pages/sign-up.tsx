@@ -413,7 +413,7 @@ export default function Signup() {
     <div className={styles.container}>
       <div className={styles.signupBox}>
         <div className={styles.logoContainer}>
-          <Image src="/school-logo.svg" alt="School Logo" width={200} height={100} />
+          <Image src="/school-logo.png" alt="School Logo" width={200} height={200} />
         </div>
         
         <h1 className={styles.title}>Parent Registration</h1>
