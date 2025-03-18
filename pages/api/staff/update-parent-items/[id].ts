@@ -1,10 +1,8 @@
 // pages/api/staff/update-parent-items/[id].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getCurrentUser } from '../../../../lib/auth';
-import { getParentById } from '../../../../lib/parentStudent';
-import { getProductById } from '../../../../lib/products';
-import { createInvoiceItem, createInvoice } from '../../../../lib/stripe';
-import { addParentPurchase } from '../../../../lib/products';
+import { getCurrentUser } from '../../../../lib/auth.ts';
+import { getStudent } from '../../../../lib/parentStudent.ts';
+import { addProductToParent } from '../../../../lib/stripe.ts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -13,6 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const user = await getCurrentUser(req, 'staff');
+    
     if (!user) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
@@ -24,17 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     const parentId = parseInt(id, 10);
-    const parent = await getParentById(parentId);
-    
-    if (!parent || !parent.stripeCustomerId) {
-      return res.status(404).json({ success: false, message: 'Parent not found' });
-    }
-    
     const { items } = req.body;
     
     if (!items || Object.keys(items).length === 0) {
       return res.status(400).json({ success: false, message: 'No items selected' });
     }
+    
+    const results = [];
     
     // Process each item
     for (const key of Object.keys(items)) {
@@ -55,47 +50,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       if (!productId) continue;
       
-      // Get product details
-      const product = await getProductById(productId);
-      
-      if (!product) continue;
-      
-      // Create invoice item in Stripe
-      let description;
-      if (studentId) {
-        const student = await getStudent(studentId);
-        if (student) {
-          description = `${product.name} for ${student.firstName} ${student.lastName} (${quantity} units)`;
-        } else {
-          description = `${product.name} (${quantity} units)`;
-        }
-      } else {
-        description = `${product.name} (${quantity} units)`;
+      // Add the product to the parent
+      for (let i = 0; i < quantity; i++) {
+        const result = await addProductToParent(parentId, productId, studentId || null);
+        results.push(result);
       }
-      
-      const invoiceItem = await createInvoiceItem(
-        parent.stripeCustomerId,
-        product.stripePriceID,
-        description
-      );
-      
-      // Create invoice
-      const invoice = await createInvoice(parent.stripeCustomerId);
-      
-      // Add to local database
-      await addParentPurchase(
-        parent.id,
-        product.id,
-        studentId || null,
-        invoice.id,
-        description
-      );
     }
     
-    return res.status(200).json({ success: true, message: 'Items added successfully' });
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Items added successfully',
+      results
+    });
   } catch (error) {
     console.error('Error updating parent items:', error);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
-

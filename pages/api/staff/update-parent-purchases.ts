@@ -1,7 +1,6 @@
-// pages/api/staff/update-student-purchases.ts
+// pages/api/staff/update-parent-purchases.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCurrentUser } from '../../../lib/auth.ts';
-import { getStudent } from '../../../lib/parentStudent.ts';
 import { addProductToParent } from '../../../lib/stripe.ts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,10 +15,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     
-    const { studentIds, items } = req.body;
+    const { parentIds, items } = req.body;
     
-    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
-      return res.status(400).json({ success: false, message: 'No students selected' });
+    if (!parentIds || !Array.isArray(parentIds) || parentIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'No parents selected' });
     }
     
     if (!items || Object.keys(items).length === 0) {
@@ -28,13 +27,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     const results = [];
     
-    // Process each student
-    for (const studentId of studentIds) {
-      const student = await getStudent(studentId);
-      
-      if (!student || !student.parentID) continue;
-      
-      // Process each item for this student
+    // Process each parent
+    for (const parentId of parentIds) {
+      // Process each item for this parent
       for (const key of Object.keys(items)) {
         const quantity = items[key];
         if (quantity <= 0) continue;
@@ -49,9 +44,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
         if (!productId) continue;
         
-        // Add the product to the parent with the student context
+        // Add the product to the parent
         for (let i = 0; i < quantity; i++) {
-          const result = await addProductToParent(student.parentID, productId, student.id);
+          const result = await addProductToParent(parentId, productId, null);
           results.push(result);
         }
       }
@@ -63,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       results
     });
   } catch (error) {
-    console.error('Error updating student purchases:', error);
+    console.error('Error updating parent purchases:', error);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
