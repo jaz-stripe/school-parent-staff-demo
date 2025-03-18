@@ -30,7 +30,7 @@
     text-align: center;
   }
   
-  h1 {
+  .title {
     display: flex;
     align-items: center;
     margin-bottom: 2rem;
@@ -75,7 +75,7 @@
   .noPayment {
     color: #e74c3c;
   }
-  
+
 .portalButton {
     background-color: #3498db;
     color: white;

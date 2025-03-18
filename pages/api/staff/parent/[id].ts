@@ -1,8 +1,8 @@
 // pages/api/staff/parent/[id].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getCurrentUser } from '../../../../lib/auth';
-import { getParentById, getStudents } from '../../../../lib/parentStudent';
-import { getParentSubscriptions, getParentPurchases } from '../../../../lib/products';
+import { getCurrentUser } from '../../../../lib/auth.ts';
+import { getParentById, getStudents } from '../../../../lib/parentStudent.ts';
+import { getParentSubscriptions, getParentPurchases } from '../../../../lib/products.ts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -10,9 +10,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const user = await getCurrentUser(req, 'parent');
+    // Make sure to specify 'staff' role when checking auth
+    const user = await getCurrentUser(req, 'staff');
+    
     if (!user) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     
     const { id } = req.query;
@@ -23,16 +25,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     const parentId = parseInt(id, 10);
     
-    const [parent, students, subscriptions, purchases] = await Promise.all([
-      getParentById(parentId),
-      getStudents(parentId),
-      getParentSubscriptions(parentId),
-      getParentPurchases(parentId)
-    ]);
+    // Fetch parent details
+    const parent = await getParentById(parentId);
     
     if (!parent) {
       return res.status(404).json({ success: false, message: 'Parent not found' });
     }
+    
+    // Fetch related data
+    const [students, subscriptions, purchases] = await Promise.all([
+      getStudents(parentId),
+      getParentSubscriptions(parentId),
+      getParentPurchases(parentId)
+    ]);
     
     return res.status(200).json({ 
       success: true, 

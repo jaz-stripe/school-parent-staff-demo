@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = generateToken(parent);
     
     // Set auth cookie
-    setAuthCookie(res, token);
+    setAuthCookie(res, token, 'parent');
     
     return res.status(200).json({ 
       success: true, 

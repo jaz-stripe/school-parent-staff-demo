@@ -85,7 +85,7 @@ export default function ParentDetailPage() {
         
         setStaff(staffData.staff);
         
-        // Fetch parent details
+        // Use the correct API path format
         const parentRes = await fetch(`/api/staff/parent/${id}`);
         const parentData = await parentRes.json();
         
@@ -125,7 +125,11 @@ export default function ParentDetailPage() {
   }, [id, router]);
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await fetch('/api/auth/logout', { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'staff' })
+    });
     router.push('/');
   };
 
@@ -243,9 +247,9 @@ export default function ParentDetailPage() {
       />
       
       <main className={styles.main}>
-        <h1>
-          <span className={styles.emoji}>{parent.emoji}</span>
-          {parent.firstName} {parent.lastName}
+        <h1 className={styles.title}>
+            <span className={styles.emoji}>{parent.emoji}</span>
+            {parent.firstName} {parent.lastName}
         </h1>
         
         <section className={styles.parentDetailsSection}>

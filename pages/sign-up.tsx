@@ -84,14 +84,31 @@ export default function Signup() {
   };
 
   // Handle payment method success
-  const handlePaymentMethodSuccess = (paymentMethodId: string) => {
+  const handlePaymentMethodSuccess = async (paymentMethodId: string) => {
     setFormData(prev => ({
       ...prev,
       paymentMethodId
     }));
     
-    // Complete the registration
-    completeRegistration(paymentMethodId);
+    try {
+      // Complete the registration
+      const result = await completeRegistration(paymentMethodId);
+      
+      if (result.success) {
+        // Make sure we set the authentication cookie properly
+        console.log('Registration completed successfully, redirecting to parent portal...');
+        
+        // Small delay to ensure cookie is set
+        setTimeout(() => {
+          router.push('/parent-portal');
+        }, 500);
+      } else {
+        setError(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Error during registration completion:', error);
+      setError('Registration failed due to an unexpected error');
+    }
   };
 
   // Progress to next section
@@ -177,7 +194,7 @@ export default function Signup() {
   };
 
   // Complete the registration process
-  const completeRegistration = async (paymentMethodId: string) => {
+  const completeRegistration = async (paymentMethodId: string): Promise<{success: boolean, message?: string}> => {
     setLoading(true);
     setError('');
     
@@ -198,9 +215,9 @@ export default function Signup() {
           students: formData.students
         }),
       });
-
+  
       const signupData = await signupResponse.json();
-
+  
       if (!signupData.success) {
         throw new Error(signupData.message || 'Failed to create account');
       }
@@ -216,24 +233,24 @@ export default function Signup() {
           frequency: formData.paymentFrequency
         }),
       });
-
+  
       const subscriptionData = await subscriptionResponse.json();
-
+  
       if (!subscriptionData.success) {
         throw new Error(subscriptionData.message || 'Failed to create subscription');
       }
       
       // Show success message before redirecting
       setSuccessMessage('Registration successful! Redirecting to parent portal...');
+      return { success: true };
       
-      // Wait a moment to show success message
-      setTimeout(() => {
-        router.push('/parent-portal');
-      }, 2000);
     } catch (error) {
       console.error('Error completing registration:', error);
-      setError('Failed to complete registration: ' + (error.message || 'Unknown error'));
       setLoading(false);
+      return { 
+        success: false, 
+        message: 'Failed to complete registration: ' + (error.message || 'Unknown error') 
+      };
     }
   };
 

@@ -10,8 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const user = await getCurrentUser(req);
-    if (!user || user.role !== 'parent') {
+    const user = await getCurrentUser(req, 'parent');
+    if (!user) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     

@@ -11,7 +11,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     console.log('Staff profile API: Getting current user');
     
-    const user = await getCurrentUser(req);
+    
+    const user = await getCurrentUser(req, 'staff');
+    if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
     console.log('Staff profile API: Current user:', user);
     
     if (!user) {

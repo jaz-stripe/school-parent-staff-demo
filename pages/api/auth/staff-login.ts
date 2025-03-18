@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = generateToken(staff);
     
     // Set auth cookie with explicit domain and path
-    setAuthCookie(res, token);
+    setAuthCookie(res, token, 'staff');
     
     console.log('Auth cookie set, returning success response'); // Debug log
     

@@ -91,7 +91,11 @@ export default function ParentsPage() {
   }, [searchTerm, parents]);
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await fetch('/api/auth/logout', { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'staff' })
+    });
     router.push('/');
   };
 
