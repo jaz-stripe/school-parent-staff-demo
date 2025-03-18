@@ -110,6 +110,13 @@ async function initialiseDb(db: any) {
       FOREIGN KEY(productId) REFERENCES product(id),
       FOREIGN KEY(studentId) REFERENCES student(id)
     );
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      description TEXT,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
   `);
   console.log('Database schema initialized');
 }

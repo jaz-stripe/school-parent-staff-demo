@@ -6,6 +6,7 @@ import csv from 'csv-parser';
 import { getDb } from '../lib/db.ts';
 import { createTuitionProduct, createNonTuitionProduct } from '../lib/products.ts';
 import { characters, staffMembers } from '../data/PeterRabbitAndFriends.ts';
+import { getOrCreatePortalConfiguration } from '../lib/stripe.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,6 +88,11 @@ async function populateDatabase() {
     
     // Process products from CSV
     await processProductsFile();
+
+    // Also initialize the portal configuration
+    await getOrCreatePortalConfiguration();
+    
+    console.log('Database population complete!');
     
     console.log('Database population complete!');
   } catch (error) {

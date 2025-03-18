@@ -212,10 +212,15 @@ export async function retrievePaymentMethods(customerId: string, type: string = 
 
 export async function createCustomerPortalSession(customerId: string, returnUrl: string) {
   try {
+    // Get or create portal configuration ID
+    const configurationId = await getOrCreatePortalConfiguration();
+    
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: returnUrl
+      return_url: returnUrl,
+      configuration: configurationId
     });
+    
     return session;
   } catch (error) {
     console.error('Error creating customer portal session:', error);
@@ -436,4 +441,57 @@ export async function getPaymentMethodTypes(country: string = 'AU') {
   }
   
   return paymentMethodTypes;
+}
+
+export async function getOrCreatePortalConfiguration() {
+  try {
+    const db = await getDb();
+    
+    // Check if we already have a portal configuration ID
+    const setting = await db.get('SELECT value FROM settings WHERE key = ?', ['stripe_portal_config_id']);
+    
+    if (setting && setting.value) {
+      console.log(`Using existing portal configuration: ${setting.value}`);
+      return setting.value;
+    }
+    
+    // Create a new portal configuration
+    console.log('Creating new portal configuration...');
+    
+    const configuration = await stripe.billingPortal.configurations.create({
+      business_profile: {
+        headline: 'School Management System',
+      },
+      features: {
+        customer_update: {
+          allowed_updates: ['email', 'address', 'phone'],
+          enabled: true,
+        },
+        invoice_history: {
+          enabled: true,
+        },
+        payment_method_update: {
+          enabled: true,
+        },
+        subscription_cancel: {
+          enabled: false,
+        },
+        subscription_update: {
+          enabled: false
+        },
+      },
+    });
+    
+    // Save the configuration ID in the database
+    await db.run(
+      'INSERT OR REPLACE INTO settings (key, value, description) VALUES (?, ?, ?)',
+      ['stripe_portal_config_id', configuration.id, 'Stripe Customer Portal Configuration ID']
+    );
+    
+    console.log(`Created and saved new portal configuration: ${configuration.id}`);
+    return configuration.id;
+  } catch (error) {
+    console.error('Error managing portal configuration:', error);
+    throw error;
+  }
 }
