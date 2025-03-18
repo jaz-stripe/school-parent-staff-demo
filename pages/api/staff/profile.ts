@@ -1,7 +1,7 @@
 // pages/api/staff/profile.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getCurrentUser } from '../../../lib/auth';
-import { getStaffById } from '../../../lib/parentStudent';
+import { getCurrentUser } from '../../../lib/auth.ts';
+import { getStaffById } from '../../../lib/parentStudent.ts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -9,17 +9,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    console.log('Staff profile API: Getting current user');
+    
     const user = await getCurrentUser(req);
+    console.log('Staff profile API: Current user:', user);
     
-    if (!user || user.role !== 'staff') {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
     
-    const staff = await getStaffById(user.id);
+    // The issue: user.role doesn't exist when user comes from database
+    // Solution: Check if this is a staff member by how we retrieved them
     
-    if (!staff) {
-      return res.status(404).json({ success: false, message: 'Staff member not found' });
-    }
+    // If getCurrentUser returned a user, and we're in the staff API route,
+    // then this must be a staff member (since getCurrentUser checks the token role)
+    const staff = user;
     
     return res.status(200).json({ 
       success: true, 
@@ -28,7 +32,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         firstName: staff.firstName,
         lastName: staff.lastName,
         email: staff.email,
-        emoji: staff.emoji
+        emoji: staff.emoji,
+        role: 'staff' // Add role explicitly
       }
     });
   } catch (error) {

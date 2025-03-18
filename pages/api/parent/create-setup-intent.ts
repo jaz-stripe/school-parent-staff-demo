@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { customerId } = req.body;
+    const { customerId, country = 'AU' } = req.body;
 
     if (!customerId) {
       return res.status(400).json({ 
@@ -17,7 +17,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const setupIntent = await createSetupIntentForCustomer(customerId);
+    // Determine payment methods based on country
+    const paymentMethodTypes = ['card'];
+    if (country === 'AU') {
+      paymentMethodTypes.push('au_becs_debit');
+    } else if (country === 'NZ') {
+      paymentMethodTypes.push('nz_bank_account');
+    }
+
+    const setupIntent = await createSetupIntentForCustomer(customerId, paymentMethodTypes);
 
     return res.status(200).json({
       success: true,
@@ -27,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('Error creating setup intent:', error);
     return res.status(500).json({ 
       success: false, 
-      message: 'Failed to create setup intent: ' + (error.message || 'Unknown error')
+      message: 'Failed to create setup intent'
     });
   }
 }

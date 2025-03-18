@@ -45,53 +45,59 @@ export async function getStudent(studentId: number) {
   return student;
 }
 
-// Create a new parent
+// Modify the createParent function to accept a stripeCustomerId
 export async function createParent(parentData: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  emoji: string;
-  addressLine1: string;
-  addressLine2?: string;
-  subsurb: string;
-  city: string;
-  postCode: string;
-  country: string;
-}) {
-  const db = await getDb();
-  
-  // Create Stripe customer
-  const customer = await createStripeCustomer(
-    parentData.email, 
-    `${parentData.firstName} ${parentData.lastName}`
-  );
-  
-  // Insert parent into database
-  const result = await db.run(`
-    INSERT INTO parent (
-      firstName, lastName, email, password, emoji, stripeCustomerId,
-      addressLine1, addressLine2, subsurb, city, postCode, country
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    parentData.firstName,
-    parentData.lastName,
-    parentData.email,
-    parentData.password,
-    parentData.emoji,
-    customer.id,
-    parentData.addressLine1,
-    parentData.addressLine2 || '',
-    parentData.subsurb,
-    parentData.city,
-    parentData.postCode,
-    parentData.country
-  ]);
-  
-  // Get the created parent
-  const parent = await db.get('SELECT * FROM parent WHERE id = ?', [result.lastID]);
-  return parent;
-}
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    emoji: string;
+    addressLine1: string;
+    addressLine2?: string;
+    subsurb: string;
+    city: string;
+    postCode: string;
+    country: string;
+    stripeCustomerId?: string; // Make this optional
+  }) {
+    const db = await getDb();
+    
+    // Only create Stripe customer if not already provided
+    let customerIdToUse = parentData.stripeCustomerId;
+    if (!customerIdToUse) {
+      // Create Stripe customer
+      const customer = await createStripeCustomer(
+        parentData.email, 
+        `${parentData.firstName} ${parentData.lastName}`
+      );
+      customerIdToUse = customer.id;
+    }
+    
+    // Insert parent into database
+    const result = await db.run(`
+      INSERT INTO parent (
+        firstName, lastName, email, password, emoji, stripeCustomerId,
+        addressLine1, addressLine2, subsurb, city, postCode, country
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      parentData.firstName,
+      parentData.lastName,
+      parentData.email,
+      parentData.password,
+      parentData.emoji,
+      customerIdToUse,
+      parentData.addressLine1,
+      parentData.addressLine2 || '',
+      parentData.subsurb,
+      parentData.city,
+      parentData.postCode,
+      parentData.country
+    ]);
+    
+    // Get the created parent
+    const parent = await db.get('SELECT * FROM parent WHERE id = ?', [result.lastID]);
+    return parent;
+  }
 
 // Create a new student for a parent
 export async function createStudent(studentData: {

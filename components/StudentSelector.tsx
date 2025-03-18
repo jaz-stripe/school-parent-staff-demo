@@ -1,5 +1,5 @@
 // components/StudentSelector.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { children } from '../data/PeterRabbitAndFriends';
 import styles from '../styles/StudentSelector.module.css';
 
@@ -15,14 +15,38 @@ interface StudentSelectorProps {
 }
 
 export default function StudentSelector({ parentLastName, onChange }: StudentSelectorProps) {
-  const [students, setStudents] = useState<Student[]>([
-    { firstName: '', lastName: parentLastName || '', year: 1 }
-  ]);
-
-  const firstNames = children.map(child => child.firstName);
+  // Initialize with one random child
+  const getRandomChild = () => {
+    const randomIndex = Math.floor(Math.random() * children.length);
+    return children[randomIndex];
+  };
   
+  const initialChild = getRandomChild();
+  const [students, setStudents] = useState<Student[]>([{
+    firstName: initialChild.firstName,
+    lastName: initialChild.lastName,
+    year: initialChild.year
+  }]);
+
+  // Only call onChange when students state changes
+  useEffect(() => {
+    onChange(students);
+  }, [students, onChange]);
+
   const handleAddStudent = () => {
-    setStudents([...students, { firstName: '', lastName: parentLastName || '', year: 1 }]);
+    // Pick a random child for the new entry
+    const randomChild = getRandomChild();
+    
+    const newStudents = [
+      ...students, 
+      { 
+        firstName: randomChild.firstName, 
+        lastName: randomChild.lastName, 
+        year: randomChild.year 
+      }
+    ];
+    
+    setStudents(newStudents);
   };
 
   const handleRemoveStudent = (index: number) => {
@@ -30,7 +54,6 @@ export default function StudentSelector({ parentLastName, onChange }: StudentSel
       const newStudents = [...students];
       newStudents.splice(index, 1);
       setStudents(newStudents);
-      onChange(newStudents);
     }
   };
 
@@ -38,7 +61,6 @@ export default function StudentSelector({ parentLastName, onChange }: StudentSel
     const newStudents = [...students];
     newStudents[index] = { ...newStudents[index], [field]: value };
     setStudents(newStudents);
-    onChange(newStudents);
   };
 
   return (
@@ -49,17 +71,13 @@ export default function StudentSelector({ parentLastName, onChange }: StudentSel
         <div key={index} className={styles.studentRow}>
           <div className={styles.inputGroup}>
             <label htmlFor={`firstName-${index}`}>First Name</label>
-            <select
+            <input
               id={`firstName-${index}`}
+              type="text"
               value={student.firstName}
               onChange={(e) => handleChange(index, 'firstName', e.target.value)}
               required
-            >
-              <option value="">Select First Name</option>
-              {firstNames.map((name) => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
+            />
           </div>
           
           <div className={styles.inputGroup}>

@@ -1,9 +1,7 @@
 // pages/api/auth/signup.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createParent, createStudent } from '../../../lib/parentStudent';
-import { getSubscriptionByYearAndPeriod } from '../../../lib/products';
-import { createStripeCustomer, createSubscription } from '../../../lib/stripe';
-import { generateToken, setAuthCookie } from '../../../lib/auth';
+import { createParent, createStudent } from '../../../lib/parentStudent.ts';
+import { generateToken, setAuthCookie } from '../../../lib/auth.ts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -20,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Create parent
+    // Create parent in the database, using the existing Stripe customer ID
     const createdParent = await createParent({
       firstName: parent.firstName,
       lastName: parent.lastName,
@@ -32,51 +30,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       subsurb: parent.address.city || '',
       city: parent.address.state || '',
       postCode: parent.address.postal_code || '',
-      country: parent.address.country || ''
+      country: parent.address.country || '',
+      stripeCustomerId: parent.stripeCustomerId // Use the customer ID we already created
     });
     
-    // Create students and add subscriptions
-    const subscriptionItems = [];
-    
+    // Create students
     for (const studentData of students) {
       if (!studentData.firstName || !studentData.lastName || !studentData.year) continue;
       
-      // Create student
-      const student = await createStudent({
+      await createStudent({
         firstName: studentData.firstName,
         lastName: studentData.lastName,
         year: studentData.year,
         parentId: createdParent.id
       });
-      
-      // Get subscription for student's year
-      const subscription = await getSubscriptionByYearAndPeriod(
-        studentData.year, 
-        parent.paymentFrequency
-      );
-      
-      if (subscription) {
-        subscriptionItems.push({
-          price: subscription.stripePriceID,
-          metadata: {
-            studentId: student.id,
-            studentName: `${student.firstName} ${student.lastName}`,
-            year: student.year.toString()
-          }
-        });
-      }
     }
     
-    // Create Stripe subscription for tuition
-    if (subscriptionItems.length > 0 && parent.paymentMethodId) {
-      const subscription = await createSubscription(
-        createdParent.stripeCustomerId,
-        subscriptionItems,
-        parent.paymentMethodId
-      );
-    }
-    
-    // Generate JWT token
+    // Generate JWT token for authentication
     const token = generateToken({
       id: createdParent.id,
       email: createdParent.email,

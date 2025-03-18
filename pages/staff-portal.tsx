@@ -23,11 +23,17 @@ export default function StaffPortal() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('StaffPortal: Fetching profile data...'); // Debug log
+        
         // Fetch staff profile
         const profileRes = await fetch('/api/staff/profile');
+        console.log('StaffPortal: Profile response status:', profileRes.status); // Debug log
+        
         const profileData = await profileRes.json();
+        console.log('StaffPortal: Profile data:', profileData); // Debug log
         
         if (!profileData.success) {
+          console.log('StaffPortal: Profile fetch failed, redirecting to login'); // Debug log
           router.push('/');
           return;
         }

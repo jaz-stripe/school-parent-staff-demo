@@ -43,3 +43,6 @@ mydb.sqlite
 package-lock.json
 
 old/
+
+# IDE files
+.vscode

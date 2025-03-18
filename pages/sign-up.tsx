@@ -1,7 +1,6 @@
 // pages/sign-up.tsx
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import Image from 'next/image';
 import StudentSelector from '../components/StudentSelector';
 import AddressForm from '../components/AddressForm';
@@ -16,144 +15,247 @@ interface Student {
 }
 
 export default function Signup() {
-  // Parent details
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [emoji, setEmoji] = useState('');
-  
-  // Payment details
-  const [paymentFrequency, setPaymentFrequency] = useState('monthly');
-  const [setupIntentSecret, setSetupIntentSecret] = useState('');
-  const [paymentMethodId, setPaymentMethodId] = useState('');
-  
-  // Address
-  const [address, setAddress] = useState({});
-  
-  // Students
-  const [students, setStudents] = useState<Student[]>([]);
-  
-  // Form state
-  const [step, setStep] = useState(1);
-  const [error, setError] = useState('');
+  // State for the entire form
+  const [formData, setFormData] = useState({
+    // Parent details
+    firstName: '',
+    lastName: '',
+    email: '',
+    emoji: '',
+    
+    // Stripe IDs
+    stripeCustomerId: '',
+    setupIntentSecret: '',
+    paymentMethodId: '',
+    
+    // Student data
+    students: [] as Student[],
+    
+    // Payment details
+    paymentFrequency: 'monthly',
+    
+    // Address data
+    address: {}
+  });
+
+  // UI state
+  const [currentSection, setCurrentSection] = useState('details'); // 'details', 'address', 'payment'
+  const [showExpressCheckout, setShowExpressCheckout] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   
   const router = useRouter();
 
   // Populate with random character on load
   useEffect(() => {
     const randomCharacter = getRandomCharacter();
-    setFirstName(randomCharacter.firstName);
-    setLastName(randomCharacter.lastName);
-    setEmoji(randomCharacter.emoji);
-    
-    const baseEmail = process.env.NEXT_PUBLIC_DEFAULT_EMAIL || '';
-    if (baseEmail) {
-      const [localPart, domain] = baseEmail.split('@');
-      setEmail(`${localPart}+${randomCharacter.firstName.toLowerCase()}@${domain}`);
-    }
+    setFormData(prev => ({
+      ...prev,
+      firstName: randomCharacter.firstName,
+      lastName: randomCharacter.lastName,
+      emoji: randomCharacter.emoji,
+      email: `${randomCharacter.firstName.toLowerCase()}@example.com`
+    }));
   }, []);
 
-  // Create setup intent when reaching payment step
-  useEffect(() => {
-    if (step === 3) {
-      createSetupIntent();
-    }
-  }, [step]);
+  // Handle changes to parent info
+  const handleParentChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  const createSetupIntent = async () => {
+  // Handle student changes
+  const handleStudentChange = (students: Student[]) => {
+    setFormData(prev => ({
+      ...prev,
+      students
+    }));
+  };
+
+  // Handle address changes
+  const handleAddressChange = (address: any) => {
+    setFormData(prev => ({
+      ...prev,
+      address
+    }));
+  };
+
+  // Handle payment method success
+  const handlePaymentMethodSuccess = (paymentMethodId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      paymentMethodId
+    }));
+    
+    // Complete the registration
+    completeRegistration(paymentMethodId);
+  };
+
+  // Progress to next section
+  const moveToAddressSection = async () => {
+    // Validate details section
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      setError('Please fill in all required fields');
+      return;
+    }
+    
+    if (formData.students.length === 0) {
+      setError('Please add at least one student');
+      return;
+    }
+    
+    setError('');
+    setCurrentSection('address');
+  };
+
+  // Progress from address to payment section
+  const moveToPaymentSection = async () => {
+    // Validate address
+    const address = formData.address as any;
+    if (!address.line1 || !address.city || !address.postal_code || !address.country) {
+      setError('Please complete the address information');
+      return;
+    }
+    
+    setError('');
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      const response = await fetch('/api/create-setup-intent');
-      const data = await response.json();
+      // Create customer in Stripe
+      const customerResponse = await fetch('/api/parent/create-customer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          address: formData.address
+        }),
+      });
       
-      if (data.clientSecret) {
-        setSetupIntentSecret(data.clientSecret);
-      } else {
-        setError('Failed to initialize payment setup');
+      const customerData = await customerResponse.json();
+      
+      if (!customerData.success) {
+        throw new Error(customerData.message || 'Failed to create customer');
       }
-      setLoading(false);
+      
+      const customerId = customerData.customerId;
+      
+      // Create setup intent
+      const setupIntentResponse = await fetch('/api/parent/create-setup-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId,
+          country: (formData.address as any).country
+        }),
+      });
+      
+      const setupIntentData = await setupIntentResponse.json();
+      
+      if (!setupIntentData.success) {
+        throw new Error(setupIntentData.message || 'Failed to create setup intent');
+      }
+      
+      // Update form data with customer ID and setup intent
+      setFormData(prev => ({
+        ...prev,
+        stripeCustomerId: customerId,
+        setupIntentSecret: setupIntentData.clientSecret
+      }));
+      
+      setCurrentSection('payment');
     } catch (error) {
-      console.error('Error creating setup intent:', error);
-      setError('Failed to initialize payment setup');
+      console.error('Error preparing payment:', error);
+      setError('Failed to prepare payment: ' + (error.message || 'Unknown error'));
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleStudentChange = (updatedStudents: Student[]) => {
-    setStudents(updatedStudents);
-  };
-
-  const handleAddressChange = (updatedAddress: any) => {
-    setAddress(updatedAddress);
-  };
-
-  const handlePaymentMethodSuccess = (newPaymentMethodId: string) => {
-    setPaymentMethodId(newPaymentMethodId);
-    // Move to final step or submit the form
-    handleSubmit();
-  };
-
-  const nextStep = () => {
+  // Complete the registration process
+  const completeRegistration = async (paymentMethodId: string) => {
+    setLoading(true);
     setError('');
-    setStep(step + 1);
-  };
-
-  const prevStep = () => {
-    setError('');
-    setStep(step - 1);
-  };
-
-  const handleSubmit = async () => {
+    
     try {
-      setLoading(true);
-      setError('');
-      
-      const response = await fetch('/api/auth/signup', {
+      // First create the parent in our database
+      const signupResponse = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           parent: {
-            firstName,
-            lastName,
-            email,
-            emoji,
-            address,
-            paymentMethodId,
-            paymentFrequency
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            emoji: formData.emoji,
+            address: formData.address,
+            stripeCustomerId: formData.stripeCustomerId
           },
-          students
+          students: formData.students
         }),
       });
 
-      const data = await response.json();
+      const signupData = await signupResponse.json();
 
-      if (data.success) {
-        router.push('/parent-portal');
-      } else {
-        setError(data.message || 'Error creating account');
-        setLoading(false);
+      if (!signupData.success) {
+        throw new Error(signupData.message || 'Failed to create account');
       }
+      
+      // Then create the subscription
+      const subscriptionResponse = await fetch('/api/parent/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: formData.stripeCustomerId,
+          paymentMethodId,
+          students: formData.students,
+          frequency: formData.paymentFrequency
+        }),
+      });
+
+      const subscriptionData = await subscriptionResponse.json();
+
+      if (!subscriptionData.success) {
+        throw new Error(subscriptionData.message || 'Failed to create subscription');
+      }
+      
+      // Show success message before redirecting
+      setSuccessMessage('Registration successful! Redirecting to parent portal...');
+      
+      // Wait a moment to show success message
+      setTimeout(() => {
+        router.push('/parent-portal');
+      }, 2000);
     } catch (error) {
-      console.error('Error creating account:', error);
-      setError('An error occurred while creating your account');
+      console.error('Error completing registration:', error);
+      setError('Failed to complete registration: ' + (error.message || 'Unknown error'));
       setLoading(false);
     }
   };
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
+  // Toggle the Express Checkout visibility - just for demo purposes
+  const toggleExpressCheckout = () => {
+    setShowExpressCheckout(!showExpressCheckout);
+  };
+
+  // Render the current section
+  const renderSection = () => {
+    switch (currentSection) {
+      case 'details':
         return (
-          <>
+          <div className={styles.section}>
             <h2>Parent Information</h2>
             <div className={styles.inputGroup}>
               <label htmlFor="firstName">First Name</label>
               <input
                 id="firstName"
                 type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                value={formData.firstName}
+                onChange={(e) => handleParentChange('firstName', e.target.value)}
                 required
               />
             </div>
@@ -162,8 +264,8 @@ export default function Signup() {
               <input
                 id="lastName"
                 type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                value={formData.lastName}
+                onChange={(e) => handleParentChange('lastName', e.target.value)}
                 required
               />
             </div>
@@ -172,14 +274,14 @@ export default function Signup() {
               <input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => handleParentChange('email', e.target.value)}
                 required
               />
             </div>
             
             <StudentSelector
-              parentLastName={lastName}
+              parentLastName={formData.lastName}
               onChange={handleStudentChange}
             />
             
@@ -193,52 +295,56 @@ export default function Signup() {
               </button>
               <button 
                 type="button" 
-                onClick={nextStep}
+                onClick={moveToAddressSection}
                 className={styles.nextButton}
               >
                 Next: Address
               </button>
             </div>
-          </>
+          </div>
         );
       
-      case 2:
+      case 'address':
         return (
-          <>
+          <div className={styles.section}>
             <h2>Address Information</h2>
             <AddressForm
+              parentData={characters.find(c => c.lastName === formData.lastName)}
               onAddressChange={handleAddressChange}
             />
             
             <div className={styles.buttonGroup}>
               <button 
                 type="button" 
-                onClick={prevStep}
+                onClick={() => setCurrentSection('details')}
                 className={styles.backButton}
+                disabled={loading}
               >
                 Back
               </button>
               <button 
                 type="button" 
-                onClick={nextStep}
+                onClick={moveToPaymentSection}
                 className={styles.nextButton}
+                disabled={loading}
               >
-                Next: Payment
+                {loading ? 'Processing...' : 'Next: Payment'}
               </button>
             </div>
-          </>
+          </div>
         );
       
-      case 3:
+      case 'payment':
         return (
-          <>
+          <div className={styles.section}>
             <h2>Payment Information</h2>
             
             <div className={styles.frequencySelector}>
               <label>Payment Frequency</label>
               <select
-                value={paymentFrequency}
-                onChange={(e) => setPaymentFrequency(e.target.value)}
+                value={formData.paymentFrequency}
+                onChange={(e) => handleParentChange('paymentFrequency', e.target.value)}
+                disabled={loading}
               >
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
@@ -246,27 +352,39 @@ export default function Signup() {
               </select>
             </div>
             
-            {loading ? (
-              <p>Loading payment form...</p>
-            ) : setupIntentSecret ? (
+            {/* Toggle button for Express Checkout (demo purposes only) */}
+            <div className={styles.toggleContainer}>
+              <button
+                type="button"
+                onClick={toggleExpressCheckout}
+                className={styles.toggleButton}
+              >
+                {showExpressCheckout ? 'Hide Express Checkout' : 'Show Express Checkout'}
+              </button>
+            </div>
+            
+            {formData.setupIntentSecret ? (
               <PaymentMethodForm
-                setupIntentClientSecret={setupIntentSecret}
+                setupIntentClientSecret={formData.setupIntentSecret}
+                customerId={formData.stripeCustomerId}
+                showExpressCheckout={showExpressCheckout}
                 onSuccess={handlePaymentMethodSuccess}
               />
             ) : (
-              <p className={styles.error}>Failed to load payment form. Please try again.</p>
+              <p className={styles.loading}>Preparing payment form...</p>
             )}
             
             <div className={styles.buttonGroup}>
               <button 
                 type="button" 
-                onClick={prevStep}
+                onClick={() => setCurrentSection('address')}
                 className={styles.backButton}
+                disabled={loading}
               >
                 Back
               </button>
             </div>
-          </>
+          </div>
         );
       
       default:
@@ -285,28 +403,43 @@ export default function Signup() {
         
         <div className={styles.progressBar}>
           <div 
-            className={`${styles.progressStep} ${step >= 1 ? styles.active : ''}`}
+            className={`${styles.progressStep} ${currentSection === 'details' ? styles.active : styles.completed}`}
+            onClick={() => !loading && setCurrentSection('details')}
           >
             1. Details
           </div>
           <div 
-            className={`${styles.progressStep} ${step >= 2 ? styles.active : ''}`}
+            className={`${styles.progressStep} ${
+              currentSection === 'address' ? styles.active : 
+              currentSection === 'payment' ? styles.completed : ''
+            }`}
+            onClick={() => !loading && currentSection !== 'details' && setCurrentSection('address')}
           >
             2. Address
           </div>
           <div 
-            className={`${styles.progressStep} ${step >= 3 ? styles.active : ''}`}
+            className={`${styles.progressStep} ${currentSection === 'payment' ? styles.active : ''}`}
           >
             3. Payment
           </div>
         </div>
         
         {error && <p className={styles.error}>{error}</p>}
+        {successMessage && <p className={styles.success}>{successMessage}</p>}
         
         <div className={styles.formContainer}>
-          {renderStep()}
+          {renderSection()}
         </div>
+        
+        {/* Collapsible section that could be used for a unified view */}
+        {false && (
+          <div className={styles.unifiedView}>
+            {/* In the future, this could be a collapsible/expandable section that shows all fields at once */}
+            <h3>All Steps</h3>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

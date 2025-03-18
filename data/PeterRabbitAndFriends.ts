@@ -17,8 +17,8 @@ export const characters = [
     email: "peter.rabbit@garden.com" 
   },
   { 
-    firstName: "Mrs", 
-    lastName: "Tiggy-Winkle", 
+    firstName: "Tiggy", 
+    lastName: "Winkle", 
     addressLine1: "7 Hedgehog Hollow", 
     addressLine2: "", 
     subsurb: "Mosman", 
@@ -26,7 +26,7 @@ export const characters = [
     postCode: "2088", 
     country: "Australia", 
     emoji: "🦔",
-    email: "mrs.tiggywinkle@laundry.com" 
+    email: "tiggy.winkle@laundry.com" 
   },
   { 
     firstName: "Jeremy", 
@@ -89,8 +89,8 @@ export const characters = [
     email: "squirrel.nutkin@forest.net" 
   },
   { 
-    firstName: "Mrs", 
-    lastName: "Tittlemouse", 
+    firstName: "Tittle", 
+    lastName: "Mouse", 
     addressLine1: "3 Tidy Terrace", 
     addressLine2: "Behind the Skirting Board", 
     subsurb: "Carlton", 
@@ -98,11 +98,11 @@ export const characters = [
     postCode: "3053", 
     country: "Australia", 
     emoji: "🐭",
-    email: "mrs.tittlemouse@cleaning.org" 
+    email: "tittle.mouse@cleaning.org" 
   },
   { 
-    firstName: "Mr", 
-    lastName: "Tod", 
+    firstName: "Tod", 
+    lastName: "Foxx", 
     addressLine1: "27 Sly Fox Lane", 
     addressLine2: "Ginger Hill", 
     subsurb: "Woollahra", 
@@ -110,7 +110,7 @@ export const characters = [
     postCode: "2025", 
     country: "Australia", 
     emoji: "🦊",
-    email: "mr.tod@cunning.com" 
+    email: "tod.foxx@cunning.com" 
   },
   { 
     firstName: "Timmy", 

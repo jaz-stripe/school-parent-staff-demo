@@ -13,6 +13,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 
 interface PaymentFormProps {
   setupIntentClientSecret: string;
+  customerId: string;
   onSuccess: (paymentMethod: string) => void;
 }
 
@@ -32,26 +33,29 @@ function CheckoutForm({ setupIntentClientSecret, onSuccess }: PaymentFormProps) 
     setIsLoading(true);
     setErrorMessage(null);
 
-    const { error, setupIntent } = await stripe.confirmSetup({
-      elements,
-      confirmParams: {
-        return_url: window.location.origin + '/payment-success',
-      },
-      redirect: 'if_required',
-    });
+    try {
+      const result = await stripe.confirmSetup({
+        elements,
+        redirect: 'if_required',
+      });
 
-    setIsLoading(false);
-
-    if (error) {
-      setErrorMessage(error.message || 'An error occurred with the payment');
-    } else if (setupIntent.status === 'succeeded') {
-      if (setupIntent.payment_method) {
-        onSuccess(setupIntent.payment_method);
+      if (result.error) {
+        setErrorMessage(result.error.message || 'An error occurred with the payment');
+        console.error('Setup confirmation error:', result.error);
+      } else if (result.setupIntent && result.setupIntent.status === 'succeeded') {
+        if (result.setupIntent.payment_method) {
+          onSuccess(result.setupIntent.payment_method as string);
+        } else {
+          setErrorMessage('Payment method setup succeeded but no payment method was returned');
+        }
       } else {
-        setErrorMessage('Payment method setup succeeded but no payment method was returned');
+        setErrorMessage(`Unexpected setup intent status: ${result.setupIntent?.status}`);
       }
-    } else {
-      setErrorMessage(`Unexpected setup intent status: ${setupIntent.status}`);
+    } catch (err) {
+      console.error('Error in setup confirmation:', err);
+      setErrorMessage('An unexpected error occurred during payment setup');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +79,21 @@ function CheckoutForm({ setupIntentClientSecret, onSuccess }: PaymentFormProps) 
 }
 
 export default function PaymentMethodForm({ setupIntentClientSecret, onSuccess }: PaymentFormProps) {
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    // We have a client secret, Stripe is loading, so we can hide the loading indicator
+    setLoading(false);
+  }, []);
+
+  if (!setupIntentClientSecret) {
+    return <div>Waiting for payment setup...</div>;
+  }
+
+  if (loading) {
+    return <div>Loading payment form...</div>;
+  }
+
   const options = {
     clientSecret: setupIntentClientSecret,
     appearance: {
@@ -85,7 +104,10 @@ export default function PaymentMethodForm({ setupIntentClientSecret, onSuccess }
   return (
     <div className={styles.container}>
       <Elements stripe={stripePromise} options={options}>
-        <CheckoutForm setupIntentClientSecret={setupIntentClientSecret} onSuccess={onSuccess} />
+        <CheckoutForm 
+          setupIntentClientSecret={setupIntentClientSecret}
+          onSuccess={onSuccess} 
+        />
       </Elements>
     </div>
   );

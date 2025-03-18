@@ -43,16 +43,27 @@
   color: #7f8c8d;
   border-bottom: 2px solid #ddd;
   font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .progressStep.active {
   color: #2c3e50;
-  border-bottom-color: #3498db;
+  border-bottom-color: #0095cf;
   font-weight: bold;
+}
+
+.progressStep.completed {
+  color: #2c3e50;
+  border-bottom-color: #2ecc71;
 }
 
 .formContainer {
   margin-top: 2rem;
+}
+
+.section {
+  animation: fadeIn 0.5s ease;
 }
 
 .inputGroup {
@@ -63,15 +74,27 @@
   display: block;
   margin-bottom: 0.5rem;
   color: #555;
+  font-weight: 500;
 }
 
 .inputGroup input,
-.inputGroup select {
+.inputGroup select,
+.frequencySelector select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.85rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  color: #333;
+  background-color: white;
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus,
+.frequencySelector select:focus {
+  outline: none;
+  border-color: #0095cf;
+  box-shadow: 0 0 0 2px rgba(0, 149, 207, 0.2);
 }
 
 .buttonGroup {
@@ -88,16 +111,18 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: 600;
 }
 
 .nextButton {
-  background-color: #3498db;
+  background-color: #0095cf;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: 600;
 }
 
 .backButton:hover {
@@ -105,16 +130,31 @@
 }
 
 .nextButton:hover {
-  background-color: #2980b9;
+  background-color: #007bb5;
+}
+
+.backButton:disabled,
+.nextButton:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
 }
 
 .error {
   color: #e74c3c;
   margin: 1rem 0;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border-radius: 4px;
   background-color: rgba(231, 76, 60, 0.1);
   border-left: 4px solid #e74c3c;
+}
+
+.success {
+  color: #2ecc71;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border-radius: 4px;
+  background-color: rgba(46, 204, 113, 0.1);
+  border-left: 4px solid #2ecc71;
 }
 
 .frequencySelector {
@@ -125,13 +165,28 @@
   display: block;
   margin-bottom: 0.5rem;
   color: #555;
+  font-weight: 500;
 }
 
-.frequencySelector select {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: white;
+.loading {
+  color: #7f8c8d;
+  text-align: center;
+  padding: 1rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.unifiedView {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
 }

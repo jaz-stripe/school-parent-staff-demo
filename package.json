@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
-    "@stripe/stripe-js": "^5.6.0",
+    "@stripe/react-stripe-js": "^3.4.0",
+    "@stripe/stripe-js": "^5.10.0",
     "better-sqlite3": "latest",
     "cookie": "^1.0.2",
     "csv-parser": "^3.2.0",
@@ -22,6 +23,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-redux": "^9.2.0",
+    "react-stripe": "^0.1.0",
     "redux": "^5.0.1",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
