@@ -91,7 +91,7 @@ export default function StaffPortal() {
       />
       
       <main className={styles.main}>
-        <h1>Staff Dashboard</h1>
+        <h1 className={styles.title}>Staff Dashboard</h1>
         
         <section className={styles.quickLinks}>
           <div className={styles.linkCard} onClick={() => router.push('/parents')}>

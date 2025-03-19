@@ -9,6 +9,13 @@
     max-width: 1200px;
     margin: 0 auto;
   }
+
+  .title {
+    color: var(--color-title);
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-xxlarge);
+    text-shadow: 0 1px 2px var(--color-title-shadow);
+  }
   
   .loading {
     display: flex;
