@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar';
-import styles from '../styles/ParentPortal.module.css';
 import ProductSelection from '../components/ProductSelection';
+import styles from '../styles/ParentPortal.module.css';
 
 interface Student {
   id: number;
@@ -34,6 +34,7 @@ export default function ParentPortal() {
   const [parentItems, setParentItems] = useState<Product[]>([]);
   const [selectedItems, setSelectedItems] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
   
@@ -91,6 +92,7 @@ export default function ParentPortal() {
     router.push('/');
   };
 
+  // Updated item change handler that works with ProductSelection component
   const handleItemChange = (itemKey: string, increment: boolean) => {
     setSelectedItems(prev => {
       const updated = { ...prev };
@@ -110,26 +112,9 @@ export default function ParentPortal() {
     });
   };
 
-  const decreaseItem = (type: string, id: number, studentId?: number) => {
-    const key = studentId ? `student_${studentId}_${id}` : `parent_${id}`;
-    
-    setSelectedItems(prev => {
-      const newItems = { ...prev };
-      
-      if (newItems[key] && newItems[key] > 0) {
-        newItems[key]--;
-        
-        if (newItems[key] === 0) {
-          delete newItems[key];
-        }
-      }
-      
-      return newItems;
-    });
-  };
-
   const handleUpdate = async () => {
     try {
+      setUpdateLoading(true);
       setUpdateStatus('Updating...');
       
       const response = await fetch('/api/parent/update-purchases', {
@@ -150,6 +135,8 @@ export default function ParentPortal() {
     } catch (error) {
       console.error('Error updating purchases:', error);
       setUpdateStatus('An error occurred while updating items');
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -182,106 +169,34 @@ export default function ParentPortal() {
           <h2>Your Children</h2>
           
           {students.length === 0 ? (
-            <p>No children registered yet.</p>
+            <p className={styles.emptyState}>No children registered yet.</p>
           ) : (
             students.map(student => (
-              <div key={student.id} className={styles.studentCard}>
-                <div className={styles.studentHeader}>
-                  <h3>{student.firstName} {student.lastName}</h3>
-                  <span className={styles.yearBadge}>Year {student.year}</span>
-                </div>
-                
-                <h4>Available Items</h4>
-                <div className={styles.itemsGrid}>
-                  {studentItems.map(item => {
-                    const itemKey = `student_${student.id}_${item.id}`;
-                    const quantity = selectedItems[itemKey] || 0;
-                    
-                    return (
-                      <div key={item.id} className={styles.itemCard}>
-                        <div className={styles.itemInfo}>
-                          <span>{item.name}</span>
-                          <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
-                        </div>
-                        
-                        <div className={styles.quantityControls}>
-                          <button
-                            onClick={() => decreaseItem('student', item.id, student.id)}
-                            disabled={quantity === 0}
-                          >
-                            -
-                          </button>
-                          <span>{quantity}</span>
-                          <button
-                            onClick={() => handleItemChange('student', item.id, student.id)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <ProductSelection
+                key={student.id}
+                title={`${student.firstName} ${student.lastName} (Year ${student.year})`}
+                products={studentItems}
+                selectedItems={selectedItems}
+                keyPrefix={`student_${student.id}`}
+                onItemChange={handleItemChange}
+                emptyMessage="No items available for students"
+              />
             ))
           )}
         </section>
         
-        <section className={styles.parentItemsSection}>
-          <h2>Items for Parents</h2>
-          
-          <div className={styles.itemsGrid}>
-            {parentItems.map(item => {
-              const itemKey = `parent_${item.id}`;
-              const quantity = selectedItems[itemKey] || 0;
-              
-              return (
-                <div key={item.id} className={styles.itemCard}>
-                  <div className={styles.itemInfo}>
-                    <span>{item.name}</span>
-                    <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
-                  </div>
-                  
-                  <div className={styles.quantityControls}>
-                    <button
-                      onClick={() => decreaseItem('parent', item.id)}
-                      disabled={quantity === 0}
-                    >
-                      -
-                    </button>
-                    <span>{quantity}</span>
-                    <button
-                      onClick={() => handleItemChange('parent', item.id)}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-        
-        {Object.keys(selectedItems).length > 0 && (
-          <div className={styles.updateSection}>
-            <button
-              onClick={handleUpdate}
-              className={styles.updateButton}
-              disabled={updateStatus === 'Updating...'}
-            >
-              Update Purchases
-            </button>
-            {updateStatus && (
-              <p className={
-                updateStatus.includes('success')
-                  ? styles.successStatus
-                  : styles.errorStatus
-              }>
-                {updateStatus}
-              </p>
-            )}
-          </div>
-        )}
+        <ProductSelection
+          title="Items for Parents"
+          products={parentItems}
+          selectedItems={selectedItems}
+          keyPrefix="parent"
+          onItemChange={handleItemChange}
+          onUpdate={handleUpdate}
+          updateButtonText="Update Purchases"
+          status={updateStatus}
+          isLoading={updateLoading}
+          emptyMessage="No items available for parents"
+        />
         
         <div className={styles.portalLinkContainer}>
           <a href="/api/portal" className={styles.portalLink}>
