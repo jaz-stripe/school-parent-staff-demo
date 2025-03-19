@@ -1,8 +1,7 @@
 // pages/api/staff/embedded/outstanding-invoices.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCurrentUser } from '../../../../lib/auth';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '../../../../lib/config';
+import { getOutstandingInvoices } from '../../../../lib/stripe';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -15,16 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     
-    const stripe = new Stripe(STRIPE_SECRET_KEY as string, {
-      apiVersion: '2023-10-16',
-    });
-    
     // Get outstanding invoices
-    const invoices = await stripe.invoices.list({
-      status: 'open',
-      limit: 10,
-      expand: ['data.customer']
-    });
+    const invoices = await getOutstandingInvoices()
     
     // Create a simple HTML table list to display
     const html = `

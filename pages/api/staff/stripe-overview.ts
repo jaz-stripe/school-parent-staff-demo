@@ -1,8 +1,7 @@
 // pages/api/staff/stripe-overview.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCurrentUser } from '../../../lib/auth';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '../../../lib/config';
+import { getAccountOverview } from '../../../lib/stripe';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -14,18 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!user) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
-    
-    const stripe = new Stripe(STRIPE_SECRET_KEY as string, {
-      apiVersion: '2023-10-16',
-    });
-    
-    // Get counts of various entities
-    const [customers, subscriptions, invoices, paymentIntents] = await Promise.all([
-      stripe.customers.list({ limit: 100 }),
-      stripe.subscriptions.list({ limit: 100 }),
-      stripe.invoices.list({ limit: 100, status: 'open' }),
-      stripe.paymentIntents.list({ limit: 100 })
-    ]);
+
+    const [customers, subscriptions, invoices, paymentIntents] = await getAccountOverview(100);
     
     const recentPayments = paymentIntents.data
       .filter(pi => pi.status === 'succeeded')

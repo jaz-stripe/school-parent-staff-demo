@@ -114,8 +114,6 @@ export async function createSubscription(customerId: string, items: Stripe.Subsc
     throw error;
   }
 }
-// lib/stripe.ts
-
 /**
  * Add an invoice item to a parent's subscription
  * @param customerId The Stripe customer ID
@@ -343,7 +341,8 @@ export async function createSetupIntentForCustomer(
   try {
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
-      usage: 'off_session'
+      usage: 'off_session',
+      automatic_payment_methods: { enabled: true }
     });
     
     console.log(`Created setup intent: ${setupIntent.id} for customer: ${customerId}`);
@@ -546,3 +545,27 @@ export async function getOrCreatePortalConfiguration() {
     throw error;
   }
 }
+
+export async function getAccountOverview(limit: number) {
+  return Promise.all([
+      stripe.customers.list({ limit: limit }),
+      stripe.subscriptions.list({ limit: limit }),
+      stripe.invoices.list({ limit: limit, status: 'open' }),
+      stripe.paymentIntents.list({ limit: limit })
+    ])
+};
+
+export async function getOutstandingInvoices() {
+  return stripe.invoices.list({
+  status: 'open',
+  limit: 10,
+  expand: ['data.customer']
+  })
+};
+
+export async function getRecentTransactions(limit: number) {
+return stripe.paymentIntents.list({
+    limit: limit,
+    expand: ['data.customer']
+  })
+};

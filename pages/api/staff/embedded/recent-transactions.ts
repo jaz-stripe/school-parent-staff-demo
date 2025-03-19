@@ -1,8 +1,7 @@
 // pages/api/staff/embedded/recent-transactions.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCurrentUser } from '../../../../lib/auth';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '../../../../lib/config';
+import { getRecentTransactions } from '../../../../lib/stripe';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -15,15 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     
-    const stripe = new Stripe(STRIPE_SECRET_KEY as string, {
-      apiVersion: '2023-10-16',
-    });
-    
     // Get recent payments
-    const paymentIntents = await stripe.paymentIntents.list({
-      limit: 10,
-      expand: ['data.customer']
-    });
+    const paymentIntents = await getRecentTransactions(10)
     
     // Filter for successful payments
     const successfulPayments = paymentIntents.data.filter(pi => pi.status === 'succeeded');
