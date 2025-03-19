@@ -12,7 +12,7 @@ interface Student {
   year: number;
   parentFirstName: string;
   parentLastName: string;
-  parentId: number;
+  parentID: number;
 }
 
 interface Product {
@@ -184,8 +184,18 @@ export default function StudentsPage() {
     }
   };
 
-  const handleViewParent = (parentId: number) => {
-    router.push(`/parent?id=${parentId}`);
+  const handleViewParent = (parentID: number) => {
+    console.log('Viewing parent with ID:', parentID);
+    
+    if (!parentID || parentID === undefined) {
+      console.error('Invalid parent ID:', parentID);
+      return;
+    }
+    
+    router.push({
+      pathname: '/parent',
+      query: { id: parentID.toString() }
+    });
   };
 
   if (loading) {
@@ -271,7 +281,7 @@ export default function StudentsPage() {
                   </div>
                   <div className={styles.rowAction}>
                     <button 
-                      onClick={() => handleViewParent(student.parentId)}
+                      onClick={() => handleViewParent(student.parentID)}
                       className={styles.viewButton}
                     >
                       View Parent
