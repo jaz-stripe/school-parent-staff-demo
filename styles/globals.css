@@ -1,14 +1,166 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-body {
-  margin: 0;
-  font-family: 'Roboto', sans-serif;
-  color: #ffffff;
-  min-height: 100vh;
-  background: linear-gradient(to bottom right, #192263, #712E69);
-  background-attachment: fixed;
-}
+/* styles/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import './theme.css';
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background: var(--gradient-primary);
+  background-attachment: fixed;
+  color: var(--color-dark);
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-secondary);
+  margin-bottom: var(--space-md);
+}
+
+h1 {
+  font-size: var(--font-size-xxlarge);
+}
+
+h2 {
+  font-size: var(--font-size-xlarge);
+}
+
+h3 {
+  font-size: var(--font-size-large);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Common button styles */
+button, .button {
+  font-family: var(--font-family);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  border: none;
+  font-size: var(--font-size-base);
+}
+
+button:hover, .button:hover {
+  transform: translateY(-1px);
+}
+
+button:active, .button:active {
+  transform: translateY(0);
+}
+
+button:disabled, .button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button variations */
+.button-primary {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.button-primary:hover:not(:disabled) {
+  background-color: var(--button-primary-hover);
+}
+
+.button-secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background-color: var(--button-secondary-hover);
+}
+
+.button-success {
+  background-color: var(--button-success-bg);
+  color: var(--button-success-text);
+}
+
+.button-success:hover:not(:disabled) {
+  background-color: var(--button-success-hover);
+}
+
+.button-danger {
+  background-color: var(--button-danger-bg);
+  color: var(--button-danger-text);
+}
+
+.button-danger:hover:not(:disabled) {
+  background-color: var(--button-danger-hover);
+}
+
+.button-light {
+  background-color: var(--button-light-bg);
+  color: var(--button-light-text);
+}
+
+.button-light:hover:not(:disabled) {
+  background-color: var(--button-light-hover);
+}
+
+/* Common card styles */
+.card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-medium);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+/* Form element styles */
+input, select, textarea {
+  padding: var(--space-md);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-small);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--color-dark);
+}
+
+/* Status messages */
+.error {
+  color: var(--color-danger);
+  background-color: var(--color-danger-light);
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  margin-bottom: var(--space-md);
+}
+
+.success {
+  color: var(--color-accent);
+  background-color: var(--color-accent-light);
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  margin-bottom: var(--space-md);
 }

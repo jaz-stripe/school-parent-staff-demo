@@ -92,7 +92,6 @@ export default function Login() {
             >
               Staff Login
             </button>
-            // pages/index.tsx (continued)
             <Link href="/sign-up" className={styles.signupButton}>
               New parent? Sign up now!
             </Link>

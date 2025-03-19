@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar';
+import ProductSelection from '../components/ProductSelection';
 import styles from '../styles/Students.module.css';
 
 interface Student {
@@ -32,6 +33,7 @@ export default function StudentsPage() {
   const [yearFilter, setYearFilter] = useState<number | ''>('');
   
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
   
@@ -68,10 +70,10 @@ export default function StudentsPage() {
           setStudentItems(itemsData.products);
         }
         
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load data');
+      } finally {
         setLoading(false);
       }
     };
@@ -127,37 +129,22 @@ export default function StudentsPage() {
     }
   };
 
-  const handleItemChange = (itemId: number) => {
-    const key = `item_${itemId}`;
-    
+  const handleItemChange = (itemKey: string, increment: boolean) => {
     setSelectedItems(prev => {
-      const newItems = { ...prev };
+      const updated = { ...prev };
+      const currentVal = updated[itemKey] || 0;
       
-      if (newItems[key]) {
-        newItems[key]++;
-      } else {
-        newItems[key] = 1;
-      }
-      
-      return newItems;
-    });
-  };
-
-  const decreaseItem = (itemId: number) => {
-    const key = `item_${itemId}`;
-    
-    setSelectedItems(prev => {
-      const newItems = { ...prev };
-      
-      if (newItems[key] && newItems[key] > 0) {
-        newItems[key]--;
-        
-        if (newItems[key] === 0) {
-          delete newItems[key];
+      if (increment) {
+        updated[itemKey] = currentVal + 1;
+      } else if (currentVal > 0) {
+        if (currentVal === 1) {
+          delete updated[itemKey];
+        } else {
+          updated[itemKey] = currentVal - 1;
         }
       }
       
-      return newItems;
+      return updated;
     });
   };
 
@@ -168,7 +155,8 @@ export default function StudentsPage() {
     }
     
     try {
-      setUpdateStatus('Updating...');
+      setUpdating(true);
+      setUpdateStatus('');
       
       const response = await fetch('/api/staff/update-student-purchases', {
         method: 'POST',
@@ -191,6 +179,8 @@ export default function StudentsPage() {
     } catch (error) {
       console.error('Error updating purchases:', error);
       setUpdateStatus('An error occurred while adding items');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -221,7 +211,7 @@ export default function StudentsPage() {
       />
       
       <main className={styles.main}>
-        <h1>Manage Students</h1>
+        <h1 className={styles.title}>Manage Students</h1>
         
         <div className={styles.filtersContainer}>
           <input
@@ -294,68 +284,21 @@ export default function StudentsPage() {
         </section>
         
         {selectedStudents.length > 0 && (
-          <section className={styles.itemsSection}>
-            <h2>Add Items to Selected Students ({selectedStudents.length})</h2>
-            
-            <div className={styles.itemsGrid}>
-              {studentItems.map(item => {
-                const itemKey = `item_${item.id}`;
-                const quantity = selectedItems[itemKey] || 0;
-                
-                return (
-                  <div key={item.id} className={styles.itemCard}>
-                    <div className={styles.itemInfo}>
-                      <span>{item.name}</span>
-                      <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
-                    </div>
-                    
-                    <div className={styles.quantityControls}>
-                      <button
-                        onClick={() => decreaseItem(item.id)}
-                        disabled={quantity === 0}
-                      >
-                        -
-                      </button>
-                      <span>{quantity}</span>
-                      <button
-                        onClick={() => handleItemChange(item.id)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className={styles.updateContainer}>
-              <button
-                onClick={handleUpdate}
-                className={styles.updateButton}
-                disabled={
-                  selectedStudents.length === 0 || 
-                  Object.keys(selectedItems).length === 0 ||
-                  updateStatus === 'Updating...'
-                }
-              >
-                Add Items to Selected Students
-              </button>
-              
-              {updateStatus && (
-                <p className={
-                  updateStatus.includes('success')
-                    ? styles.successStatus
-                    : styles.errorStatus
-                }>
-                  {updateStatus}
-                </p>
-              )}
-            </div>
-          </section>
+          <ProductSelection
+            title={`Add Items to Selected Students (${selectedStudents.length})`}
+            products={studentItems}
+            selectedItems={selectedItems}
+            keyPrefix="item"
+            onItemChange={handleItemChange}
+            onUpdate={handleUpdate}
+            updateButtonText="Add Items to Selected Students"
+            status={updateStatus}
+            isLoading={updating}
+            emptyMessage="No student items available"
+          />
         )}
       </main>
     </div>
   );
 }
 
-                  

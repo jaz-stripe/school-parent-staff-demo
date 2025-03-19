@@ -2,7 +2,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar';
+import ProductSelection from '../components/ProductSelection';
 import styles from '../styles/ParentDetail.module.css';
+
+interface Student {
+  id: number;
+  firstName: string;
+  lastName: string;
+  year: number;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  type: string;
+  amount: number;
+}
 
 interface Parent {
   id: number;
@@ -18,20 +33,6 @@ interface Parent {
   country: string;
   stripeCustomerId: string;
   hasPaymentMethod: boolean;
-}
-
-interface Student {
-  id: number;
-  firstName: string;
-  lastName: string;
-  year: number;
-}
-
-interface Product {
-  id: number;
-  name: string;
-  type: string;
-  amount: number;
 }
 
 interface Subscription {
@@ -63,6 +64,7 @@ export default function ParentDetailPage() {
   
   const [selectedItems, setSelectedItems] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
+  const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
   
@@ -85,7 +87,7 @@ export default function ParentDetailPage() {
         
         setStaff(staffData.staff);
         
-        // Use the correct API path format
+        // Fetch parent details
         const parentRes = await fetch(`/api/staff/parent/${id}`);
         const parentData = await parentRes.json();
         
@@ -113,10 +115,10 @@ export default function ParentDetailPage() {
           setParentItems(parentItemsData.products);
         }
         
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load parent data');
+      } finally {
         setLoading(false);
       }
     };
@@ -133,37 +135,22 @@ export default function ParentDetailPage() {
     router.push('/');
   };
 
-  const handleItemChange = (type: string, id: number, studentId?: number) => {
-    const key = studentId ? `student_${studentId}_${id}` : `parent_${id}`;
-    
+  const handleItemChange = (itemKey: string, increment: boolean) => {
     setSelectedItems(prev => {
-      const newItems = { ...prev };
+      const updated = { ...prev };
+      const currentVal = updated[itemKey] || 0;
       
-      if (newItems[key]) {
-        newItems[key]++;
-      } else {
-        newItems[key] = 1;
-      }
-      
-      return newItems;
-    });
-  };
-
-  const decreaseItem = (type: string, id: number, studentId?: number) => {
-    const key = studentId ? `student_${studentId}_${id}` : `parent_${id}`;
-    
-    setSelectedItems(prev => {
-      const newItems = { ...prev };
-      
-      if (newItems[key] && newItems[key] > 0) {
-        newItems[key]--;
-        
-        if (newItems[key] === 0) {
-          delete newItems[key];
+      if (increment) {
+        updated[itemKey] = currentVal + 1;
+      } else if (currentVal > 0) {
+        if (currentVal === 1) {
+          delete updated[itemKey];
+        } else {
+          updated[itemKey] = currentVal - 1;
         }
       }
       
-      return newItems;
+      return updated;
     });
   };
 
@@ -174,7 +161,8 @@ export default function ParentDetailPage() {
     }
     
     try {
-      setUpdateStatus('Updating...');
+      setUpdateLoading(true);
+      setUpdateStatus('');
       
       const response = await fetch(`/api/staff/update-parent-items/${parent.id}`, {
         method: 'POST',
@@ -203,6 +191,8 @@ export default function ParentDetailPage() {
     } catch (error) {
       console.error('Error updating purchases:', error);
       setUpdateStatus('An error occurred while adding items');
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -248,8 +238,8 @@ export default function ParentDetailPage() {
       
       <main className={styles.main}>
         <h1 className={styles.title}>
-            <span className={styles.emoji}>{parent.emoji}</span>
-            {parent.firstName} {parent.lastName}
+          <span className={styles.emoji}>{parent.emoji}</span>
+          {parent.firstName} {parent.lastName}
         </h1>
         
         <section className={styles.parentDetailsSection}>
@@ -299,104 +289,32 @@ export default function ParentDetailPage() {
           ) : (
             <div className={styles.studentsGrid}>
               {students.map(student => (
-                <div key={student.id} className={styles.studentCard}>
-                  <div className={styles.studentHeader}>
-                    <h3>{student.firstName} {student.lastName}</h3>
-                    <span className={styles.yearBadge}>Year {student.year}</span>
-                  </div>
-                  
-                  <h4>Add Items</h4>
-                  <div className={styles.itemsGrid}>
-                    {studentItems.map(item => {
-                      const itemKey = `student_${student.id}_${item.id}`;
-                      const quantity = selectedItems[itemKey] || 0;
-                      
-                      return (
-                        <div key={item.id} className={styles.itemCard}>
-                          <div className={styles.itemInfo}>
-                            <span>{item.name}</span>
-                            <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
-                          </div>
-                          
-                          <div className={styles.quantityControls}>
-                            <button
-                              onClick={() => decreaseItem('student', item.id, student.id)}
-                              disabled={quantity === 0}
-                            >
-                              -
-                            </button>
-                            <span>{quantity}</span>
-                            <button
-                              onClick={() => handleItemChange('student', item.id, student.id)}
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <ProductSelection
+                  key={student.id}
+                  title={`${student.firstName} (Year ${student.year})`}
+                  products={studentItems}
+                  selectedItems={selectedItems}
+                  keyPrefix={`student_${student.id}`}
+                  onItemChange={handleItemChange}
+                  emptyMessage="No items available for students"
+                />
               ))}
             </div>
           )}
         </section>
         
-        <section className={styles.parentItemsSection}>
-          <h2>Add Parent Items</h2>
-          
-          <div className={styles.itemsGrid}>
-            {parentItems.map(item => {
-              const itemKey = `parent_${item.id}`;
-              const quantity = selectedItems[itemKey] || 0;
-              
-              return (
-                <div key={item.id} className={styles.itemCard}>
-                  <div className={styles.itemInfo}>
-                    <span>{item.name}</span>
-                    <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
-                  </div>
-                  
-                  <div className={styles.quantityControls}>
-                    <button
-                      onClick={() => decreaseItem('parent', item.id)}
-                      disabled={quantity === 0}
-                    >
-                      -
-                    </button>
-                    <span>{quantity}</span>
-                    <button
-                      onClick={() => handleItemChange('parent', item.id)}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-        
-        {Object.keys(selectedItems).length > 0 && (
-          <div className={styles.updateSection}>
-            <button
-              onClick={handleUpdate}
-              className={styles.updateButton}
-              disabled={updateStatus === 'Updating...'}
-            >
-              Add Items
-            </button>
-            {updateStatus && (
-              <p className={
-                updateStatus.includes('success')
-                  ? styles.successStatus
-                  : styles.errorStatus
-              }>
-                {updateStatus}
-              </p>
-            )}
-          </div>
-        )}
+        <ProductSelection
+          title="Parent Items"
+          products={parentItems}
+          selectedItems={selectedItems}
+          keyPrefix="parent"
+          onItemChange={handleItemChange}
+          onUpdate={handleUpdate}
+          updateButtonText="Add Selected Items"
+          status={updateStatus}
+          isLoading={updateLoading}
+          emptyMessage="No items available for parents"
+        />
         
         <section className={styles.subscriptionsSection}>
           <h2>Subscriptions</h2>

@@ -17,15 +17,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Determine payment methods based on country
-    const paymentMethodTypes = ['card'];
-    if (country === 'AU') {
-      paymentMethodTypes.push('au_becs_debit');
-    } else if (country === 'NZ') {
-      paymentMethodTypes.push('nz_bank_account');
-    }
+    // // Determine payment methods based on country
+    // const paymentMethodTypes = ['card'];
+    // if (country === 'AU') {
+    //   paymentMethodTypes.push('au_becs_debit');
+    // } else if (country === 'NZ') {
+    //   paymentMethodTypes.push('nz_bank_account');
+    // }
 
-    const setupIntent = await createSetupIntentForCustomer(customerId, paymentMethodTypes);
+    const setupIntent = await createSetupIntentForCustomer(customerId);
 
     return res.status(200).json({
       success: true,

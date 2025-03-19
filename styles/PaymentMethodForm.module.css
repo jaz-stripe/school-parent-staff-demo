@@ -1,41 +1,94 @@
 /* styles/PaymentMethodForm.module.css */
 .container {
-    margin: 1.5rem 0;
+    margin: var(--space-lg) 0;
   }
   
   .form {
-    padding: 1rem;
-    background-color: #f5f5f5;
-    border-radius: 8px;
+    padding: var(--space-md);
+    background-color: var(--color-white);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-small);
+    margin-bottom: var(--space-md);
   }
   
   .submitButton {
-    background-color: #2c3e50;
-    color: white;
+    background-color: var(--button-primary-bg);
+    color: var(--button-primary-text);
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-small);
     cursor: pointer;
-    font-size: 1rem;
-    margin-top: 1.5rem;
+    font-size: var(--font-size-base);
+    margin-top: var(--space-lg);
     width: 100%;
+    font-weight: 600;
   }
   
   .submitButton:hover {
-    background-color: #34495e;
+    background-color: var(--button-primary-hover);
   }
   
   .submitButton:disabled {
-    background-color: #95a5a6;
+    background-color: var(--color-gray);
     cursor: not-allowed;
   }
   
   .error {
-    color: #e74c3c;
-    margin-top: 1rem;
-    padding: 0.5rem;
-    border-radius: 4px;
+    color: var(--color-danger);
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--radius-small);
     background-color: rgba(231, 76, 60, 0.1);
-    border-left: 4px solid #e74c3c;
+    border-left: 4px solid var(--color-danger);
+  }
+  
+  .expressCheckoutContainer {
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    background-color: var(--color-white);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-small);
+  }
+  
+  .expressCheckoutContainer h3 {
+    margin-top: 0;
+    color: var(--color-secondary);
+    font-size: var(--font-size-medium);
+    margin-bottom: var(--space-md);
+  }
+  
+  .toggleButton {
+    background: transparent;
+    border: 1px solid var(--color-gray-light);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: var(--font-size-small);
+    color: var(--color-gray-dark);
+    margin-bottom: var(--space-md);
+  }
+  
+  .toggleButton:hover {
+    background-color: var(--color-light);
+  }
+  
+  .toggleContainer {
+    text-align: right;
+    margin-bottom: var(--space-md);
+  }
+
+  .paymentElementContainer {
+    border: 1px solid var(--color-gray-light);
+    border-radius: var(--radius-medium);
+    padding: var(--space-md);
+    background-color: var(--color-white);
+    margin-bottom: var(--space-md);
+  }
+  
+  .paymentElementLabel {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: var(--color-dark);
   }
   

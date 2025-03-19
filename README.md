@@ -168,6 +168,7 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
    ```bash
    stripe listen --skip-verify --forward-to https://localhost:3000/api/webhooks
    ```
+   This will output the STRIPE_WEBHOOK_SECRET when it runs `whsec_...`
 
 5. Add the webhook signing secret to your `.env` file:
    ```

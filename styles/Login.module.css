@@ -4,15 +4,14 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #ecf0f1;
-  padding: 1rem;
+  padding: var(--space-md);
 }
 
 .loginBox {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  background-color: rgba(255, 255, 255, var(--gradient-opacity));
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-large);
+  padding: var(--space-xl);
   width: 100%;
   max-width: 400px;
   display: flex;
@@ -21,13 +20,13 @@
 }
 
 .logoContainer {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
 }
 
 .title {
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  font-size: 1.5rem;
+  margin-bottom: var(--space-lg);
+  color: var(--color-secondary);
+  font-size: var(--font-size-xlarge);
   text-align: center;
 }
 
@@ -38,52 +37,58 @@
 }
 
 .input {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-small);
+  font-size: var(--font-size-base);
 }
 
 .button {
-  background-color: #3498db;
-  color: white;
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
   border: none;
-  padding: 0.75rem;
-  border-radius: 4px;
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
   cursor: pointer;
-  font-size: 1rem;
-  margin-bottom: 1rem;
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-md);
 }
 
 .button:hover {
-  background-color: #2980b9;
+  background-color: var(--button-primary-hover);
 }
 
 .switchButton {
   background: none;
   border: none;
-  color: #7f8c8d;
+  color: var(--color-secondary);
   cursor: pointer;
-  font-size: 0.9rem;
-  margin: 1rem 0;
+  font-size: var(--font-size-small);
+  margin: var(--space-md) 0;
 }
 
 .switchButton:hover {
   text-decoration: underline;
+  color: var(--color-secondary);
 }
 
 .signupButton {
   background: none;
   border: none;
-  color: #2c3e50;
+  color: var(--color-primary);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   text-decoration: underline;
 }
 
+.signupButton:hover {
+  color: var(--color-primary-dark);
+}
+
 .error {
-  color: #e74c3c;
-  margin: 0.5rem 0 1rem;
-  font-size: 0.9rem;
+  color: var(--color-danger);
+  margin: var(--space-sm) 0 var(--space-md);
+  font-size: var(--font-size-small);
+  text-align: center;
 }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar';
 import styles from '../styles/ParentPortal.module.css';
+import ProductSelection from '../components/ProductSelection';
 
 interface Student {
   id: number;
@@ -90,19 +91,22 @@ export default function ParentPortal() {
     router.push('/');
   };
 
-  const handleItemChange = (type: string, id: number, studentId?: number) => {
-    const key = studentId ? `student_${studentId}_${id}` : `parent_${id}`;
-    
+  const handleItemChange = (itemKey: string, increment: boolean) => {
     setSelectedItems(prev => {
-      const newItems = { ...prev };
+      const updated = { ...prev };
+      const currentVal = updated[itemKey] || 0;
       
-      if (newItems[key]) {
-        newItems[key]++;
-      } else {
-        newItems[key] = 1;
+      if (increment) {
+        updated[itemKey] = currentVal + 1;
+      } else if (currentVal > 0) {
+        if (currentVal === 1) {
+          delete updated[itemKey];
+        } else {
+          updated[itemKey] = currentVal - 1;
+        }
       }
       
-      return newItems;
+      return updated;
     });
   };
 
@@ -172,7 +176,7 @@ export default function ParentPortal() {
       />
       
       <main className={styles.main}>
-        <h1>Welcome, {parent.firstName}!</h1>
+        <h1 className={styles.title}>Welcome, {parent.firstName}!</h1>
         
         <section className={styles.studentsSection}>
           <h2>Your Children</h2>
@@ -197,7 +201,6 @@ export default function ParentPortal() {
                       <div key={item.id} className={styles.itemCard}>
                         <div className={styles.itemInfo}>
                           <span>{item.name}</span>
-                          // pages/parent-portal.tsx (continued)
                           <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
                         </div>
                         

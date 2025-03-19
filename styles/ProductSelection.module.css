@@ -1,0 +1,176 @@
+/* styles/ProductSelection.module.css */
+.productSection {
+    margin-bottom: var(--space-xl);
+    background-color: var(--card-bg);
+    padding: var(--space-lg);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .sectionTitle {
+    color: var(--color-secondary);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-large);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .selectionCount {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 0.3em 0.7em;
+    border-radius: 20px;
+    font-size: var(--font-size-small);
+    font-weight: bold;
+  }
+  
+  .itemsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+  }
+  
+  .itemCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-white);
+    border-radius: var(--radius-small);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-small);
+    transition: transform 0.1s ease-in-out;
+  }
+  
+  .itemCard:hover {
+    transform: translateY(-2px);
+  }
+  
+  .itemInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  
+  .itemName {
+    font-weight: 500;
+    color: var(--color-secondary);
+  }
+  
+  .itemPrice {
+    font-size: var(--font-size-small);
+    color: var(--color-gray-dark);
+    margin-top: var(--space-xs);
+  }
+  
+  .quantityControls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-width: 90px;
+    justify-content: flex-end;
+  }
+  
+  .quantityControls button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: var(--font-size-medium);
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  
+  .decrementButton {
+    background-color: var(--color-gray-light);
+    color: var(--color-dark);
+  }
+  
+  .decrementButton:hover:not(:disabled) {
+    background-color: var(--color-gray);
+  }
+  
+  .incrementButton {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  .incrementButton:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+  }
+  
+  .quantityControls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .quantityControls span {
+    font-weight: 500;
+    min-width: 20px;
+    text-align: center;
+  }
+  
+  .updateSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--space-lg);
+  }
+  
+  .updateButton {
+    background-color: var(--button-success-bg);
+    color: var(--button-success-text);
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    min-width: 200px;
+  }
+  
+  .updateButton:hover:not(:disabled) {
+    background-color: var(--button-success-hover);
+  }
+  
+  .updateButton:disabled {
+    background-color: var(--color-gray);
+    cursor: not-allowed;
+  }
+  
+  .updateButtonIcon {
+    margin-right: var(--space-sm);
+  }
+  
+  .successStatus {
+    color: var(--color-accent);
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-accent-light);
+    border-radius: var(--radius-small);
+    border-left: 4px solid var(--color-accent);
+  }
+  
+  .errorStatus {
+    color: var(--color-danger);
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-danger-light);
+    border-radius: var(--radius-small);
+    border-left: 4px solid var(--color-danger);
+  }
+  
+  /* For empty state */
+  .emptyState {
+    text-align: center;
+    padding: var(--space-lg);
+    color: var(--color-gray-dark);
+    background-color: var(--color-light);
+    border-radius: var(--radius-small);
+    margin: var(--space-md) 0;
+  }
+  

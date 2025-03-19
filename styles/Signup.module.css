@@ -4,15 +4,15 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #ecf0f1;
-  padding: 1rem;
+  padding: var(--space-md);
+  background: var(--gradient-primary);
 }
 
 .signupBox {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  background-color: rgba(255, 255, 255, var(--gradient-opacity));
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-large);
+  padding: var(--space-xl);
   width: 100%;
   max-width: 800px;
 }
@@ -20,46 +20,46 @@
 .logoContainer {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
 }
 
 .title {
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  font-size: 1.5rem;
+  margin-bottom: var(--space-lg);
+  color: var(--color-secondary);
+  font-size: var(--font-size-xlarge);
   text-align: center;
 }
 
 .progressBar {
   display: flex;
   justify-content: space-between;
-  margin: 2rem 0;
+  margin: var(--space-xl) 0;
 }
 
 .progressStep {
   flex: 1;
   text-align: center;
-  padding: 0.5rem;
-  color: #7f8c8d;
-  border-bottom: 2px solid #ddd;
-  font-size: 0.9rem;
+  padding: var(--space-sm);
+  color: var(--color-gray-dark);
+  border-bottom: 2px solid var(--color-gray-light);
+  font-size: var(--font-size-small);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .progressStep.active {
-  color: #2c3e50;
-  border-bottom-color: #0095cf;
+  color: var(--color-secondary);
+  border-bottom-color: var(--color-primary);
   font-weight: bold;
 }
 
 .progressStep.completed {
-  color: #2c3e50;
-  border-bottom-color: #2ecc71;
+  color: var(--color-secondary);
+  border-bottom-color: var(--color-accent);
 }
 
 .formContainer {
-  margin-top: 2rem;
+  margin-top: var(--space-xl);
 }
 
 .section {
@@ -67,13 +67,13 @@
 }
 
 .inputGroup {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
 }
 
 .inputGroup label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #555;
+  margin-bottom: var(--space-sm);
+  color: var(--color-dark);
   font-weight: 500;
 }
 
@@ -81,97 +81,97 @@
 .inputGroup select,
 .frequencySelector select {
   width: 100%;
-  padding: 0.85rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #333;
-  background-color: white;
+  padding: var(--space-md);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius-small);
+  font-size: var(--font-size-base);
+  color: var(--color-dark);
+  background-color: var(--color-white);
 }
 
 .inputGroup input:focus,
 .inputGroup select:focus,
 .frequencySelector select:focus {
   outline: none;
-  border-color: #0095cf;
-  box-shadow: 0 0 0 2px rgba(0, 149, 207, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 
 .buttonGroup {
   display: flex;
   justify-content: space-between;
-  margin-top: 2rem;
+  margin-top: var(--space-xl);
 }
 
 .backButton {
-  background-color: #7f8c8d;
-  color: white;
+  background-color: var(--button-light-bg);
+  color: var(--button-light-text);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-small);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
 }
 
 .nextButton {
-  background-color: #0095cf;
-  color: white;
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-small);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
 }
 
 .backButton:hover {
-  background-color: #95a5a6;
+  background-color: var(--button-light-hover);
 }
 
 .nextButton:hover {
-  background-color: #007bb5;
+  background-color: var(--button-primary-hover);
 }
 
 .backButton:disabled,
 .nextButton:disabled {
-  background-color: #95a5a6;
+  background-color: var(--color-gray);
   cursor: not-allowed;
 }
 
 .error {
-  color: #e74c3c;
-  margin: 1rem 0;
-  padding: 0.75rem;
-  border-radius: 4px;
-  background-color: rgba(231, 76, 60, 0.1);
-  border-left: 4px solid #e74c3c;
+  color: var(--color-danger);
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  background-color: var(--color-danger-light);
+  border-left: 4px solid var(--color-danger);
 }
 
 .success {
-  color: #2ecc71;
-  margin: 1rem 0;
-  padding: 0.75rem;
-  border-radius: 4px;
-  background-color: rgba(46, 204, 113, 0.1);
-  border-left: 4px solid #2ecc71;
+  color: var(--color-accent);
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  background-color: var(--color-accent-light);
+  border-left: 4px solid var(--color-accent);
 }
 
 .frequencySelector {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
 }
 
 .frequencySelector label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #555;
+  margin-bottom: var(--space-sm);
+  color: var(--color-dark);
   font-weight: 500;
 }
 
 .loading {
-  color: #7f8c8d;
+  color: var(--color-gray-dark);
   text-align: center;
-  padding: 1rem;
+  padding: var(--space-md);
 }
 
 @keyframes fadeIn {
@@ -183,10 +183,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.unifiedView {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #eee;
 }

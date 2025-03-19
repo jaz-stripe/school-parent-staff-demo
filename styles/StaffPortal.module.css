@@ -1,11 +1,11 @@
 /* styles/StaffPortal.module.css */
 .container {
     min-height: 100vh;
-    background-color: #ecf0f1;
+    background: var(--gradient-primary);
   }
   
   .main {
-    padding: 7rem 2rem 2rem;
+    padding: 7rem var(--space-xl) var(--space-xl);
     max-width: 1200px;
     margin: 0 auto;
   }
@@ -15,8 +15,8 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    font-size: 1.2rem;
-    color: #7f8c8d;
+    font-size: var(--font-size-medium);
+    color: var(--color-white);
   }
   
   .error {
@@ -24,24 +24,24 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    font-size: 1.2rem;
-    color: #e74c3c;
-    padding: 1rem;
+    font-size: var(--font-size-medium);
+    color: var(--color-danger);
+    padding: var(--space-md);
     text-align: center;
   }
   
   .quickLinks {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
   }
   
   .linkCard {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, var(--gradient-opacity));
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-medium);
+    padding: var(--space-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -51,68 +51,69 @@
   
   .linkCard:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-large);
   }
   
-.iconContainer {
+  .iconContainer {
     font-size: 2.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-md);
   }
   
   .linkCard h3 {
-    margin: 0 0 0.5rem;
-    color: #2c3e50;
+    margin: 0 0 var(--space-sm);
+    color: var(--color-secondary);
   }
   
   .linkCard p {
     margin: 0;
-    color: #7f8c8d;
+    color: var(--color-gray-dark);
     text-align: center;
   }
   
-  .overviewSection {
-    margin-bottom: 3rem;
+  .overviewSection,
+  .invoicesSection,
+  .recentTransactionsSection {
+    margin-bottom: var(--space-xl);
+    background-color: rgba(255, 255, 255, var(--gradient-opacity));
+    padding: var(--space-lg);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-medium);
   }
   
   .overviewGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
   }
   
   .overviewCard {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+    background-color: var(--color-white);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-small);
+    padding: var(--space-lg);
     text-align: center;
   }
   
   .overviewCard h3 {
-    margin: 0 0 1rem;
-    color: #2c3e50;
-    font-size: 1.1rem;
+    margin: 0 0 var(--space-md);
+    color: var(--color-secondary);
+    font-size: var(--font-size-medium);
   }
   
   .overviewValue {
-    font-size: 2rem;
+    font-size: var(--font-size-xxlarge);
     font-weight: bold;
-    color: #3498db;
+    color: var(--color-primary);
     margin: 0;
   }
   
-  .invoicesSection,
-  .recentTransactionsSection {
-    margin-bottom: 3rem;
-  }
-  
   .embeddedComponent {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 0.5rem;
-    margin-top: 1.5rem;
+    background-color: var(--color-white);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-small);
+    padding: var(--space-sm);
+    margin-top: var(--space-lg);
     overflow: hidden;
   }
   
@@ -121,5 +122,4 @@
     height: 400px;
     border: none;
   }
-  
   

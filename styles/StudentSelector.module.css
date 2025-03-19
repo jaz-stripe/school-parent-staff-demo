@@ -1,69 +1,72 @@
 /* styles/StudentSelector.module.css */
 .container {
-    margin: 1.5rem 0;
+    margin: var(--space-lg) 0;
   }
   
-.studentRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 1rem;
-  align-items: end;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-}
-
-.inputGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.inputGroup label {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.inputGroup input,
-.inputGroup select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: white;
-}
-
-.removeButton {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  height: 40px;
-  align-self: flex-end;
-}
-
-.addButton {
-  background-color: #2c3e50;
-  color: white;
-  border: none;
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.addButton:hover {
-  background-color: #34495e;
-}
-
-.removeButton:hover {
-  background-color: #c0392b;
-}
+  .studentRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: var(--space-md);
+    align-items: end;
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    background-color: var(--color-light);
+    border-radius: var(--radius-small);
+  }
+  
+  .inputGroup {
+    margin-bottom: var(--space-sm);
+  }
+  
+  .inputGroup label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: 500;
+    color: var(--color-dark);
+  }
+  
+  .inputGroup input,
+  .inputGroup select {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--color-gray-light);
+    border-radius: var(--radius-small);
+    font-size: var(--font-size-base);
+    background-color: var(--color-white);
+  }
+  
+  .removeButton {
+    background-color: var(--button-danger-bg);
+    color: var(--button-danger-text);
+    border: none;
+    padding: var(--space-md);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: var(--font-size-small);
+    height: 40px; /* Fixed height to align with inputs */
+    align-self: flex-end;
+  }
+  
+  .addButton {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    border: none;
+    padding: var(--space-md);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: var(--font-size-small);
+    margin-top: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .addButton:hover {
+    background-color: var(--color-secondary-light);
+  }
+  
+  .removeButton:hover {
+    background-color: var(--button-danger-hover);
+  }
+  

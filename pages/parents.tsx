@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar';
+import ProductSelection from '../components/ProductSelection';
 import styles from '../styles/Parents.module.css';
 
 interface Parent {
@@ -30,6 +31,7 @@ export default function ParentsPage() {
   const [selectedItems, setSelectedItems] = useState<{ [key: string]: number }>({});
   
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
   
@@ -66,10 +68,10 @@ export default function ParentsPage() {
           setParentItems(itemsData.products);
         }
         
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load data');
+      } finally {
         setLoading(false);
       }
     };
@@ -88,6 +90,9 @@ export default function ParentsPage() {
     } else {
       setFilteredParents(parents);
     }
+    
+    // Clear selection when filter changes
+    setSelectedParents([]);
   }, [searchTerm, parents]);
 
   const handleLogout = async () => {
@@ -117,37 +122,22 @@ export default function ParentsPage() {
     }
   };
 
-  const handleItemChange = (itemId: number) => {
-    const key = `item_${itemId}`;
-    
+  const handleItemChange = (itemKey: string, increment: boolean) => {
     setSelectedItems(prev => {
-      const newItems = { ...prev };
+      const updated = { ...prev };
+      const currentVal = updated[itemKey] || 0;
       
-      if (newItems[key]) {
-        newItems[key]++;
-      } else {
-        newItems[key] = 1;
-      }
-      
-      return newItems;
-    });
-  };
-
-  const decreaseItem = (itemId: number) => {
-    const key = `item_${itemId}`;
-    
-    setSelectedItems(prev => {
-      const newItems = { ...prev };
-      
-      if (newItems[key] && newItems[key] > 0) {
-        newItems[key]--;
-        
-        if (newItems[key] === 0) {
-          delete newItems[key];
+      if (increment) {
+        updated[itemKey] = currentVal + 1;
+      } else if (currentVal > 0) {
+        if (currentVal === 1) {
+          delete updated[itemKey];
+        } else {
+          updated[itemKey] = currentVal - 1;
         }
       }
       
-      return newItems;
+      return updated;
     });
   };
 
@@ -158,7 +148,8 @@ export default function ParentsPage() {
     }
     
     try {
-      setUpdateStatus('Updating...');
+      setUpdating(true);
+      setUpdateStatus('');
       
       const response = await fetch('/api/staff/update-parent-purchases', {
         method: 'POST',
@@ -181,6 +172,8 @@ export default function ParentsPage() {
     } catch (error) {
       console.error('Error updating purchases:', error);
       setUpdateStatus('An error occurred while adding items');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -192,8 +185,7 @@ export default function ParentsPage() {
     return <div className={styles.loading}>Loading...</div>;
   }
 
-// pages/parents.tsx (continued)
-if (error) {
+  if (error) {
     return <div className={styles.error}>{error}</div>;
   }
 
@@ -212,7 +204,7 @@ if (error) {
       />
       
       <main className={styles.main}>
-        <h1>Manage Parents</h1>
+        <h1 className={styles.title}>Manage Parents</h1>
         
         <div className={styles.searchContainer}>
           <input
@@ -279,64 +271,18 @@ if (error) {
         </section>
         
         {selectedParents.length > 0 && (
-          <section className={styles.itemsSection}>
-            <h2>Add Items to Selected Parents ({selectedParents.length})</h2>
-            
-            <div className={styles.itemsGrid}>
-              {parentItems.map(item => {
-                const itemKey = `item_${item.id}`;
-                const quantity = selectedItems[itemKey] || 0;
-                
-                return (
-                  <div key={item.id} className={styles.itemCard}>
-                    <div className={styles.itemInfo}>
-                      <span>{item.name}</span>
-                      <span className={styles.itemPrice}>${(item.amount / 100).toFixed(2)}</span>
-                    </div>
-                    
-                    <div className={styles.quantityControls}>
-                      <button
-                        onClick={() => decreaseItem(item.id)}
-                        disabled={quantity === 0}
-                      >
-                        -
-                      </button>
-                      <span>{quantity}</span>
-                      <button
-                        onClick={() => handleItemChange(item.id)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className={styles.updateContainer}>
-              <button
-                onClick={handleUpdate}
-                className={styles.updateButton}
-                disabled={
-                  selectedParents.length === 0 || 
-                  Object.keys(selectedItems).length === 0 ||
-                  updateStatus === 'Updating...'
-                }
-              >
-                Add Items to Selected Parents
-              </button>
-              
-              {updateStatus && (
-                <p className={
-                  updateStatus.includes('success')
-                    ? styles.successStatus
-                    : styles.errorStatus
-                }>
-                  {updateStatus}
-                </p>
-              )}
-            </div>
-          </section>
+          <ProductSelection
+            title={`Add Items to Selected Parents (${selectedParents.length})`}
+            products={parentItems}
+            selectedItems={selectedItems}
+            keyPrefix="item"
+            onItemChange={handleItemChange}
+            onUpdate={handleUpdate}
+            updateButtonText="Add Items to Selected Parents"
+            status={updateStatus}
+            isLoading={updating}
+            emptyMessage="No parent items available"
+          />
         )}
       </main>
     </div>

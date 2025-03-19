@@ -60,8 +60,9 @@ function CheckoutForm({ setupIntentClientSecret, onSuccess }: PaymentFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <PaymentElement />
+    <form onSubmit={handleSubmit} className={styles.paymentElementContainer}>
+    <label className={styles.paymentElementLabel}>Payment Information</label>
+    <PaymentElement />
       
       {errorMessage && (
         <div className={styles.error}>{errorMessage}</div>
