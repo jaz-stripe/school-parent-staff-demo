@@ -130,3 +130,42 @@
     border: none;
   }
   
+  .setupSection {
+    margin: var(--space-lg) 0;
+    background-color: rgba(255, 255, 255, var(--gradient-opacity));
+    border-radius: var(--radius-medium);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .setupButton {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-small);
+    font-size: var(--font-size-base);
+    border: none;
+    cursor: pointer;
+    margin-top: var(--space-md);
+    transition: background-color 0.2s;
+  }
+  
+  .setupButton:hover:not(:disabled) {
+    background-color: var(--button-success-hover);
+  }
+  
+  .setupButton:disabled {
+    background-color: var(--color-gray);
+    cursor: not-allowed;
+  }
+  
+  .errorStatus {
+    color: var(--color-danger);
+    margin-top: var(--space-md);
+  }
+  
+  .successStatus {
+    color: var(--color-accent);
+    margin-top: var(--space-md);
+  }
+  

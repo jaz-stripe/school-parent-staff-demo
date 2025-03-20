@@ -4,19 +4,14 @@ import { useRouter } from 'next/router';
 import TopBar from '../components/TopBar';
 import styles from '../styles/StaffPortal.module.css';
 
-interface Staff {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  emoji: string;
-}
-
 export default function StaffPortal() {
-  const [staff, setStaff] = useState<Staff | null>(null);
+  const [staff, setStaff] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stripeAccountData, setStripeAccountData] = useState<any>(null);
+  const [isPopulatingProducts, setIsPopulatingProducts] = useState(false);
+  const [populateStatus, setPopulateStatus] = useState('');
+  const [isPopulated, setIsPopulated] = useState(false);
   
   const router = useRouter();
 
@@ -39,6 +34,11 @@ export default function StaffPortal() {
         }
         
         setStaff(profileData.staff);
+        
+        // Check if account has products populated
+        if (profileData.success && profileData.staff?.accountIsPopulated !== undefined) {
+          setIsPopulated(profileData.staff.accountIsPopulated);
+        }
         
         // Fetch Stripe account overview data
         const accountRes = await fetch('/api/staff/stripe-overview');
@@ -67,6 +67,43 @@ export default function StaffPortal() {
     });
     router.push('/');
   };
+  
+  // Add this function to handle product population
+  const handlePopulateProducts = async () => {
+    setIsPopulatingProducts(true);
+    setPopulateStatus('Creating products...');
+    
+    try {
+      const response = await fetch('/api/accounts/populate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accountId: staff.accountId
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPopulateStatus('Products created successfully!');
+        setIsPopulated(true);
+        
+        // Refresh school data after a brief delay
+        setTimeout(() => {
+          setPopulateStatus('');
+        }, 3000);
+      } else {
+        setPopulateStatus(`Error: ${data.message || 'Failed to create products'}`);
+      }
+    } catch (error) {
+      console.error('Error creating products:', error);
+      setPopulateStatus('Failed to connect to server');
+    } finally {
+      setIsPopulatingProducts(false);
+    }
+  };
 
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
@@ -88,6 +125,8 @@ export default function StaffPortal() {
         userName={`${staff.firstName} ${staff.lastName}`}
         role="staff"
         onLogout={handleLogout}
+        accountName={staff.accountName || 'School'}
+        accountLogo={staff.accountLogo || 'school-logo.png'}
       />
       
       <main className={styles.main}>
@@ -106,6 +145,28 @@ export default function StaffPortal() {
             <p>View and update student information</p>
           </div>
         </section>
+        
+        {/* New school setup section */}
+        {!isPopulated && (
+          <section className={styles.setupSection}>
+            <h2>School Setup</h2>
+            <p>Your school needs to be set up with catalog items, tuition products, and prices.</p>
+            
+            <button
+              className={styles.setupButton}
+              onClick={handlePopulateProducts}
+              disabled={isPopulatingProducts}
+            >
+              {isPopulatingProducts ? 'Creating Products...' : 'Create Stripe Products'}
+            </button>
+            
+            {populateStatus && (
+              <p className={populateStatus.includes('Error') ? styles.errorStatus : styles.successStatus}>
+                {populateStatus}
+              </p>
+            )}
+          </section>
+        )}
         
         <section className={styles.overviewSection}>
           <h2>Account Overview</h2>

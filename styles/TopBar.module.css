@@ -1,4 +1,4 @@
-/* styles/TopBar.module.css */
+/* styles/TopBar.module.css (updated) */
 .header {
   display: flex;
   justify-content: space-between;
@@ -23,6 +23,14 @@
   position: relative;
   cursor: pointer;
   margin-right: var(--space-xl);
+  border-radius: 50%;
+  overflow: hidden;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
 }
 
 .backArrow {
@@ -121,4 +129,23 @@
 .dropdown a:hover,
 .dropdown button:hover {
   background-color: var(--color-light);
+}
+
+.schoolInfoDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--dropdown-bg);
+  border-radius: var(--radius-small);
+  box-shadow: var(--shadow-large);
+  padding: var(--space-md);
+  min-width: 200px;
+  z-index: 1001;
+  margin-top: var(--space-sm);
+}
+
+.schoolName {
+  font-weight: bold;
+  color: var(--color-secondary);
+  margin: 0;
 }

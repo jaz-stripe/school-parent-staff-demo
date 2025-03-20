@@ -1,0 +1,154 @@
+/* styles/AccountSelection.module.css */
+.accountSelectorOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.accountSelector {
+  background-color: var(--color-white);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-large);
+  padding: var(--space-xl);
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.accountSelector h2 {
+  margin-bottom: var(--space-lg);
+  color: var(--color-secondary);
+  font-size: var(--font-size-xlarge);
+  text-align: center;
+}
+
+.accountList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.accountItem {
+  display: flex;
+  align-items: center;
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  background-color: var(--color-light);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.accountItem:hover {
+  background-color: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+.accountItem.selected {
+  background-color: var(--color-primary-light);
+  border-left: 4px solid var(--color-primary);
+}
+
+.accountLogo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-white);
+}
+
+.accountName {
+  font-weight: 500;
+  color: var(--color-secondary);
+}
+
+.addSchoolButton {
+  background-color: var(--color-accent);
+  color: var(--color-white);
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: var(--space-md);
+}
+
+.addSchoolButton:hover {
+  background-color: var(--button-success-hover);
+}
+
+.closeButton {
+  background-color: var(--color-gray-light);
+  color: var(--color-dark);
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.closeButton:hover {
+  background-color: var(--color-gray);
+}
+
+.settingsIcon {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  cursor: pointer;
+  color: var(--color-white);
+  background-color: rgba(0, 0, 0, 0.2);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.settingsIcon:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.noAccountMessage {
+  text-align: center;
+  margin: var(--space-lg) 0;
+}
+
+.selectSchoolButton {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: none;
+  padding: var(--space-md);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  margin-top: var(--space-md);
+}
+
+.selectSchoolButton:hover {
+  background-color: var(--button-primary-hover);
+}
+
+.schoolLogo {
+  border-radius: 10px;
+  object-fit: contain;
+}

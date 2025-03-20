@@ -1,8 +1,14 @@
-# School Management System with Stripe Integration
+# School Management System with Stripe Connect Integration
 
-This project is a demonstration of how a school can integrate Stripe Billing (RFA) for managing tuition payments and other school-related purchases. The system allows parents to sign up, add their children, manage payment methods, and purchase items, while staff members can view all parents and students, add items to them, and monitor transactions.
+This project is a demonstration of how multiple schools can integrate Stripe Billing (RFA) for managing tuition payments and other school-related purchases, using Stripe Connect architecture. The system allows for platform management of multiple school accounts, each with their own payment processing capabilities.
 
 ## Features
+
+### Multi-School Platform
+- Platform management of multiple school accounts
+- Each school has its own Stripe Connect account
+- School-specific branding and customization
+- Separation of data between different schools
 
 ### Parent Portal
 - Sign up and add children
@@ -12,18 +18,23 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 - Access Stripe Customer Portal for payment management
 
 ### Staff Portal
-- View all parents and students
+- View all parents and students within their school
 - Add items to multiple parents or students at once
 - View individual parent details and their children
 - Access transaction and invoice information
 - Open Stripe Customer Portal on behalf of parents
 
-### Stripe Integration
-- Subscription-based tuition payments
-- One-time purchases for various items
-- Customer Portal for payment method management
-- Webhook handling for payment events
-- Embedded components for transaction display
+### School Onboarding
+- Add new schools to the platform
+- Customizable school names and logos
+- Streamlined Stripe Connect onboarding process
+- Automatic setup of school catalog after onboarding
+
+### Stripe Connect Integration
+- Platform-level management of connected accounts
+- Each school processes payments through their own account
+- Shared product catalog framework with school-specific data
+- Support for different country requirements
 
 ## Project Structure
 
@@ -34,30 +45,37 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 ├── components/          # Reusable UI components
 │   ├── AddressForm.tsx  # Stripe Address Element wrapper
 │   ├── PaymentMethodForm.tsx # Stripe Payment Element wrapper
-│   ├── SimplifiedContext.tsx # Context for simplified mode toggle
+│   ├── ProductSelection.tsx   # Component for product selection
 │   ├── StudentSelector.tsx   # Component for selecting students
-│   └── TopBar.tsx      # Navigation bar component
+│   └── TopBar.tsx      # Navigation bar component with school logo display
+│
+├── contexts/           # React contexts
+│   └── AccountContext.tsx # Context for managing current school account
 │
 ├── data/
-│   └── PeterRabbitAndFriends.ts # Sample data for characters
+│   └── PeterRabbitAndFriends.ts # Sample data for characters and schools
 │
 ├── lib/                # Core business logic and utilities
-│   ├── auth.ts         # Authentication utilities
+│   ├── auth.ts         # Authentication with school account support
 │   ├── config.ts       # Configuration and environment variables
-│   ├── db.ts           # Database initialization and schema
-│   ├── parentStudent.ts # Parent and student operations
+│   ├── db.ts           # Database with school account data isolation
+│   ├── parentStudent.ts # Parent and student operations for specific schools
 │   ├── products.ts     # Product and subscription management
-│   └── stripe.ts       # Stripe API integration
+│   └── stripe.ts       # Stripe Connect API integration
 │
 ├── pages/              # Next.js pages and API routes
 │   ├── api/            # API endpoints
+│   │   ├── accounts/   # School account management
+│   │   │   ├── create.ts # Create new school account
+│   │   │   ├── index.ts  # List school accounts
+│   │   │   ├── onboarding-complete.ts # Handle onboarding completion
+│   │   │   └── populate.ts # Populate school database
 │   │   ├── auth/       # Authentication endpoints
 │   │   │   ├── login.ts
 │   │   │   ├── logout.ts
 │   │   │   ├── parent-login.ts
 │   │   │   ├── signup.ts
 │   │   │   └── staff-login.ts
-│   │   ├── create-setup-intent.ts
 │   │   ├── parent/     # Parent-specific endpoints
 │   │   │   ├── profile.ts
 │   │   │   ├── students.ts
@@ -77,9 +95,10 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 │   │   │   ├── update-parent-items/[id].ts
 │   │   │   ├── update-parent-purchases.ts
 │   │   │   └── update-student-purchases.ts
-│   │   └── webhooks.ts # Stripe webhook handler
+│   │   └── webhooks.ts # Stripe webhook handler for all accounts
 │   │
-│   ├── index.tsx       # Login page
+│   ├── index.tsx       # Login page with school selection
+│   ├── onboarding.tsx  # School onboarding page
 │   ├── parent.tsx      # Parent detail page (for staff)
 │   ├── parent-portal.tsx # Parent dashboard
 │   ├── parents.tsx     # Parents listing page (for staff)
@@ -88,11 +107,16 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 │   └── students.tsx    # Students listing page (for staff)
 │
 ├── public/             # Static assets
-│   └── school-logo.svg # School logo
+│   ├── school-logo.png  # Default school logo
+│   └── logos/           # School-specific logos
+│       ├── school-1.png
+│       ├── school-2.png
+│       └── ...
 │
 ├── scripts/            # Utility scripts
-│   ├── delete_stripe_products_and_customers.ts # Cleanup script
-│   └── populate_database.ts # Database seed script
+│   ├── delete_stripe_products_and_customers.ts # Cleanup script with Connect support
+│   ├── populate_account.ts # Script to populate a specific school's data
+│   └── populate_database.ts # Main database initialization script
 │
 ├── slices/             # Redux slices
 │   └── userSlice.ts    # User state management
@@ -102,6 +126,7 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 │   ├── globals.css
 │   ├── Login.module.css
 │   ├── Main.module.css
+│   ├── Onboarding.module.css
 │   ├── ParentDetail.module.css
 │   ├── ParentPortal.module.css
 │   ├── Parents.module.css
@@ -124,28 +149,69 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 ## Setup and Running Instructions
 
 ### Prerequisites
-- Node.js 14+ and npm
-- Stripe account (test mode)
+- Node.js 16+ and npm
+- Stripe account (in platform mode)
+- SSL certificates for local HTTPS (required for Stripe)
 - Basic understanding of Next.js, React, and TypeScript
+- Familiarity with Stripe Connect concepts
+
+### SSL Certificate Setup
+
+Since the original certificate generation script is non-functional, you'll need to create SSL certificates manually:
+
+1. Install `mkcert` (a tool for making locally-trusted development certificates):
+
+   - On macOS: `brew install mkcert`
+   - On Windows: `choco install mkcert`
+   - On Linux: Follow the [mkcert installation instructions](https://github.com/FiloSottile/mkcert#installation)
+
+2. Create and install a local CA:
+   ```bash
+   mkcert -install
+   ```
+
+3. Generate local certificates:
+   ```bash
+   mkcert localhost 127.0.0.1 ::1
+   ```
+
+4. Rename the generated files:
+   ```bash
+   mv localhost+2-key.pem localhost-key.pem
+   mv localhost+2.pem localhost.pem
+   ```
 
 ### Environment Setup
 
 1. Copy `.env.local` to `.env` and fill in the required variables:
    ```
-   STRIPE_SECRET_KEY=sk_test_...
-   STRIPE_PUBLISHABLE_KEY=pk_test_...
-   STRIPE_WEBHOOK_SECRET=whsec_...
-   JWT_SECRET=your-jwt-secret
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-   NEXT_PUBLIC_BASE_URL=https://localhost:3000
    NEXT_PUBLIC_DEFAULT_EMAIL=demo@example.com
+   NEXT_PUBLIC_BASE_URL=https://localhost:3000
+   SERVER_BASE_URL=https://localhost:3000
+   CURRENCY="aud"
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   CONNECTED_ACCOUNT=acct_... (optional)
+   JWT_SECRET=your-jwt-secret
    ```
+
+   Notes:
+   - `STRIPE_SECRET_KEY` should be your platform account API key
+   - `CONNECTED_ACCOUNT` is optional and can be used to specify a pre-existing Connect account ID
 
 2. Set up Stripe Customer Portal Configuration:
    - Go to your Stripe Dashboard
    - Navigate to Settings > Billing (enable if needed) > Customer Portal
    - Configure your preferred settings for what customers can manage
    - Save the configuration
+
+3. Create a Webhook endpoint in your Stripe Dashboard:
+   - Go to Developers > Webhooks
+   - Add an endpoint with URL: `https://your-domain/api/webhooks` 
+   - Add the events: `account.updated`, `setup_intent.succeeded`, `invoice.paid`, `invoice.payment_failed`, and `subscription.created`
+   - Get the Webhook signing secret for your `.env` file
+   - For development, use Stripe CLI for local webhook forwarding (see below)
 
 ### Installation
 
@@ -154,10 +220,12 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
    npm install
    ```
 
-2. Generate SSL certificates for local development (required for Stripe):
+2. Create the `public/logos` directory and add sample school logos:
    ```bash
-   npm run generate-cert
+   mkdir -p public/logos
    ```
+   
+   Add 10 logo image files named `school-1.png` through `school-10.png` to this directory.
 
 3. Login to Stripe CLI:
    ```bash
@@ -175,19 +243,6 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
    STRIPE_WEBHOOK_SECRET=whsec_...
    ```
 
-### Database Initialization
-
-1. Run the database population script:
-   ```bash
-   npx ts-node scripts/populate_database.ts
-   ```
-
-   This script will:
-   - Create products in Stripe based on `products.csv`
-   - Create subscription pricing for tuition products
-   - Create one-time pricing for student and parent items
-   - Add staff members from `PeterRabbitAndFriends.ts`
-
 ### Running the Application
 
 1. Start the development server:
@@ -197,19 +252,34 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 
 2. Access the application at `https://localhost:3000`
 
+3. The first time you run the application, you'll need to create a school:
+   - Look for the cog icon in the top left corner
+   - Click "Add a New School"
+   - Complete the onboarding process with Stripe
+
 ### Using the Application
 
-1. **Parent Flow**:
-   - Sign up as a new parent
+1. **Platform Admin Flow**:
+   - Use the cog icon on the login page to switch between schools or add new ones
+   - Add new schools through the onboarding process
+   - Each school will have its own isolated data
+
+2. **School Setup Flow**:
+   - Create a new school with the "Add a New School" button
+   - Complete the Stripe Connect onboarding process
+   - Once onboarding is complete, the school's database will be automatically populated
+
+3. **Parent Flow**:
+   - Sign up as a new parent for a specific school
    - Add children and select payment frequency
    - Add payment method
    - View assigned tuition subscriptions
    - Add optional items for yourself or your children
    - Access Stripe Customer Portal for payment management
 
-2. **Staff Flow**:
+4. **Staff Flow**:
    - Log in as staff (pre-defined as Mr. McGregor with password "password")
-   - View all parents and students
+   - View all parents and students for that school
    - Select multiple parents/students to add items to them
    - View individual parent details
    - View transactions and outstanding invoices
@@ -218,111 +288,126 @@ This project is a demonstration of how a school can integrate Stripe Billing (RF
 
 If you want to reset the application:
 
-1. Delete customers in the Stripe dashboard or use the API
-2. Archive products created by the application:
+1. Delete customers and products in Stripe:
    ```bash
    npx ts-node scripts/delete_stripe_products_and_customers.ts
    ```
-3. Delete the SQLite database:
+   - Add `--delete-connected-accounts` to also delete the Connect accounts
+   - Add `--clear-database` to clear the local database tables
+
+2. Or manually delete the SQLite database:
    ```bash
    rm mydb.sqlite
    ```
 
 ## Implementation Details
 
-### Database Schema
-The application uses SQLite for local storage with the following key tables:
-- `parent`: Stores parent information and Stripe customer ID
-- `student`: Links students to parents with their year level
-- `subscription`: Stores tuition products for each year
-- `subscription_price`: Links tuition products to their different payment frequencies
-- `product`: Stores non-subscription products (student/parent items)
-- `parent_subscriptions`: Records tuition subscriptions for parents
-- `parent_purchases`: Records one-time purchases by parents
+### Multi-Account Architecture
 
-### Stripe Integration
+The application uses a single platform Stripe account to manage multiple Connect accounts (one per school). Each school has:
+
+- A separate Stripe Connect Standard account
+- Isolated data in the database (via accountId foreign keys)
+- Its own Stripe customers, products, prices, and subscriptions
+- Custom branding (name and logo)
+
+### Database Schema
+
+The application uses SQLite with account-based data isolation:
+- Every table includes an `accountId` column linking to the `account` table
+- The `account` table stores Stripe Connect account IDs and onboarding status
+- Queries filter data by accountId to ensure isolation between schools
+
+### Stripe Connect Integration
+
 The application uses several Stripe features:
-- Products and Prices: Both subscription and one-time
-- Customers: Each parent is a Stripe customer
-- Payment Methods: Captured via Stripe Elements
-- Subscriptions: For recurring tuition payments
-- Invoices: For one-time purchases
+- Connect Standard Accounts: For each school
+- Account Onboarding: Streamlined onboarding experience
+- Cross-account API calls: Using the Stripe-Account header
+- Products and Prices: School-specific catalog
+- Customers and Subscriptions: For student tuition
 - Customer Portal: For payment method management
-- Webhooks: For event handling
+- Webhooks: For event handling across all accounts
 
 ### Authentication
-The application uses JSON Web Tokens (JWT) for authentication with cookies for storage. The `auth.ts` library handles token generation, verification, and user identification.
 
-### React Components
-Key components include:
-- `TopBar`: Navigation and user menu
-- `StudentSelector`: Component for selecting and managing student information
-- `AddressForm`: Wraps Stripe Address Element
-- `PaymentMethodForm`: Wraps Stripe Payment Element
+The application uses JSON Web Tokens (JWT) with account-specific scoping. This ensures:
+- Staff and parents can only access data from their own school
+- Tokens include the accountId to enforce isolation
+- Login requires selecting a specific school
 
 ## Development Notes
 
 ### Expanding the System
+
 To add new features:
 
-1. **New Product Types**:
-   - Add entries to the `products.csv` file
-   - Run the database population script
-   - Update the UI to display and manage these products
+1. **School Management Features**:
+   - Add school profile editing
+   - Implement platform admin dashboards
+   - Add support for subscription sharing between schools
 
-2. **Additional User Roles**:
-   - Extend the user model in `db.ts`
-   - Add authentication handling in `auth.ts`
-   - Create appropriate UI flows and API endpoints
+2. **Connect Account Management**:
+   - Add balance and payout reports
+   - Implement account capability management
+   - Add account verification status monitoring
 
-3. **Enhanced Reporting**:
-   - Add new API endpoints to fetch data from Stripe and the local database
-   - Create visualization components to display this data
+3. **Platform Fee Management**:
+   - Implement application fee calculations
+   - Add platform revenue reporting
+   - Create fee adjustment mechanisms
 
 ### Security Considerations
+
 This demo focuses on functionality rather than security. For a production system:
 
 1. Improve authentication with password hashing
 2. Add proper validation to all API endpoints
-3. Implement CSRF protection
+3. Implement strict account isolation checks
 4. Add rate limiting to prevent abuse
-5. Ensure all Stripe operations have proper error handling
-6. Implement comprehensive logging
+5. Use role-based access control for platform admins vs school admins
+6. Implement comprehensive logging and audit trails
 
 ### Testing
+
 The application doesn't include tests, but for a production system:
 
 1. Add unit tests for utility functions
 2. Add API tests for endpoints
-3. Add integration tests for Stripe operations
-4. Add end-to-end tests for user flows
+3. Add tests for cross-account data isolation
+4. Add integration tests for Stripe operations
+5. Add end-to-end tests for user flows
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Stripe API Key Issues**:
-   - Ensure your API keys are correct in `.env`
-   - Make sure you're using test mode keys
+1. **SSL Certificate Errors**:
+   - Ensure your certificates are properly set up
+   - Check that the browser trusts your self-signed certificate
+   - Try accessing `https://localhost:3000` directly first
 
-2. **Webhook Errors**:
-   - Ensure the webhook listener is running
-   - Check that the webhook secret is correct
+2. **Stripe Connect Onboarding Issues**:
+   - Check the Stripe dashboard for account status
+   - Review the account capabilities to ensure charges_enabled
+   - Look for event logs in your application logs and Stripe dashboard
 
-3. **Database Issues**:
-   - If errors occur during database operations, delete the SQLite file and re-run the population script
+3. **Database Population Issues**:
+   - If a school isn't populated after onboarding, use the `/api/accounts/populate` endpoint
+   - Check the server logs for any errors during population
 
-4. **Payment Setup Issues**:
-   - Check browser console for errors
-   - Ensure the Stripe publishable key is correct
-   - Test with Stripe test cards
+4. **Multiple Accounts Confusion**:
+   - If users are seeing the wrong data, ensure they're logged into the correct school
+   - Check that all queries are properly filtering by accountId
+   - Verify that the token contains the correct accountId
 
 ### Getting Help
+
 If issues persist, check:
-- Stripe documentation: https://stripe.com/docs
+- Stripe Connect documentation: https://stripe.com/docs/connect
 - Next.js documentation: https://nextjs.org/docs
 - The error logs in your console or server output
 
 ## Conclusion
 
-This application demonstrates how schools can integrate with Stripe Billing to manage tuition payments and other purchases. It provides a foundation that can be expanded with additional features specific to your school's needs.
+This application demonstrates how to build a multi-tenant platform using Stripe Connect for payment processing. It allows multiple schools to onboard to your platform, each with their own Stripe account, while maintaining a consistent user experience.

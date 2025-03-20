@@ -1,0 +1,155 @@
+/* styles/Onboarding.module.css */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--space-md);
+    background: var(--gradient-primary);
+  }
+  
+  .onboardingBox {
+    background-color: rgba(255, 255, 255, var(--gradient-opacity));
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-large);
+    padding: var(--space-xl);
+    width: 100%;
+    max-width: 700px;
+  }
+  
+  .title {
+    margin-bottom: var(--space-lg);
+    color: var(--color-secondary);
+    font-size: var(--font-size-xlarge);
+    text-align: center;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+  
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .formGroup label {
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: var(--color-dark);
+  }
+  
+  .input, .select {
+    padding: var(--space-md);
+    border: 1px solid var(--color-gray-light);
+    border-radius: var(--radius-small);
+    font-size: var(--font-size-base);
+  }
+  
+  .input:focus, .select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+  }
+  
+  .suggestions {
+    margin-top: var(--space-sm);
+  }
+  
+  .suggestionTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+  }
+  
+  .suggestionTag {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-small);
+    font-size: var(--font-size-small);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .suggestionTag:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  .logoSelector {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+  
+  .select {
+    flex: 1;
+  }
+  
+  .logoPreview {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-small);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-white);
+  }
+  
+  .previewImage {
+    object-fit: contain;
+  }
+  
+  .note, .emailNote {
+    margin-top: var(--space-xs);
+    font-size: var(--font-size-small);
+    color: var(--color-gray-dark);
+  }
+  
+  .buttonGroup {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--space-xl);
+  }
+  
+  .cancelButton {
+    background-color: var(--button-light-bg);
+    color: var(--button-light-text);
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+  }
+  
+  .submitButton {
+    background-color: var(--button-primary-bg);
+    color: var(--button-primary-text);
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+  }
+  
+  .cancelButton:hover {
+    background-color: var(--button-light-hover);
+  }
+  
+  .submitButton:hover {
+    background-color: var(--button-primary-hover);
+  }
+  
+  .error {
+    color: var(--color-danger);
+    padding: var(--space-md);
+    background-color: var(--color-danger-light);
+    border-radius: var(--radius-small);
+    margin-bottom: var(--space-md);
+  }
+  

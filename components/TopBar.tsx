@@ -10,17 +10,31 @@ interface TopBarProps {
   userName?: string;
   role: 'parent' | 'staff';
   onLogout: () => void;
+  accountName: string;
+  accountLogo: string;
 }
 
-export default function TopBar({ userEmoji, userName, role, onLogout }: TopBarProps) {
+export default function TopBar({
+  userEmoji,
+  userName,
+  role,
+  onLogout,
+  accountName,
+  accountLogo
+}: TopBarProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSchoolInfoOpen, setIsSchoolInfoOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const schoolInfoRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
+      }
+      if (schoolInfoRef.current && !schoolInfoRef.current.contains(event.target as Node)) {
+        setIsSchoolInfoOpen(false);
       }
     };
 
@@ -33,6 +47,10 @@ export default function TopBar({ userEmoji, userName, role, onLogout }: TopBarPr
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
+  
+  const toggleSchoolInfo = () => {
+    setIsSchoolInfoOpen(!isSchoolInfoOpen);
+  };
 
   return (
     <header className={styles.header}>
@@ -43,10 +61,25 @@ export default function TopBar({ userEmoji, userName, role, onLogout }: TopBarPr
             <span className={styles.backArrow}>←</span>
           </Link>
         )}
-        <div className={styles.logoContainer}>
-          <Link href={`/${role}-portal`}>
-            <Image src="/school-logo.png" alt="School Logo" width={50} height={50} />
-          </Link>
+        
+        {/* School logo and info */}
+        <div 
+          className={styles.logoContainer}
+          onClick={toggleSchoolInfo}
+          ref={schoolInfoRef}
+        >
+          <Image 
+            src={`/logos/${accountLogo}`} 
+            alt={accountName} 
+            width={50} 
+            height={50}
+          />
+          
+          {isSchoolInfoOpen && (
+            <div className={styles.schoolInfoDropdown}>
+              <p className={styles.schoolName}>{accountName}</p>
+            </div>
+          )}
         </div>
         
         {/* Navigation links based on role */}

@@ -1,36 +1,30 @@
 // pages/api/auth/staff-login.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { authenticateStaff, generateToken, setAuthCookie } from '../../../lib/auth.ts';
+import { authenticateStaff, generateToken, setAuthCookie } from '../../../lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
-  const { email, password } = req.body;
-  console.log(`Staff login attempt: ${email}`); // Debug log
+  const { email, password, accountId } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required' });
+  if (!email || !password || !accountId) {
+    return res.status(400).json({ success: false, message: 'Email, password, and account are required' });
   }
 
   try {
-    const staff = await authenticateStaff(email, password);
+    const staff = await authenticateStaff(email, password, accountId);
     
     if (!staff) {
-      console.log(`Authentication failed for ${email}`); // Debug log
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
-    
-    console.log(`Staff authenticated successfully: ${staff.email}`); // Debug log
     
     // Generate JWT token
     const token = generateToken(staff);
     
-    // Set auth cookie with explicit domain and path
+    // Set auth cookie
     setAuthCookie(res, token, 'staff');
-    
-    console.log('Auth cookie set, returning success response'); // Debug log
     
     return res.status(200).json({ 
       success: true, 
@@ -40,7 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         lastName: staff.lastName,
         email: staff.email,
         emoji: staff.emoji,
-        role: 'staff' // Explicitly include role in response
+        role: 'staff',
+        accountId: staff.accountId
       }
     });
   } catch (error) {

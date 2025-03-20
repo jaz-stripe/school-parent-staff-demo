@@ -2,15 +2,15 @@
 import { getDb } from './db';
 import { createStripeCustomer, createSetupIntent } from './stripe';
 
-// Get all parents
-export async function getAllParents() {
+// Get all parents for a specific account
+export async function getAllParents(accountId: number) {
   const db = await getDb();
-  const parents = await db.all('SELECT * FROM parent');
+  const parents = await db.all('SELECT * FROM parent WHERE accountId = ?', [accountId]);
   return parents;
 }
 
-// Get all students, optionally filtered by parent
-export async function getStudents(parentId?: number) {
+// Get all students, optionally filtered by parent and account
+export async function getStudents(accountId: number, parentId?: number) {
   const db = await getDb();
   let students;
   
@@ -19,14 +19,15 @@ export async function getStudents(parentId?: number) {
       SELECT s.*, p.firstName as parentFirstName, p.lastName as parentLastName 
       FROM student s
       JOIN parent p ON s.parentID = p.id
-      WHERE s.parentID = ?
-    `, [parentId]);
+      WHERE s.parentID = ? AND s.accountId = ?
+    `, [parentId, accountId]);
   } else {
     students = await db.all(`
       SELECT s.*, p.firstName as parentFirstName, p.lastName as parentLastName 
       FROM student s
       JOIN parent p ON s.parentID = p.id
-    `);
+      WHERE s.accountId = ?
+    `, [accountId]);
   }
   
   return students;
@@ -45,59 +46,69 @@ export async function getStudent(studentId: number) {
   return student;
 }
 
-// Modify the createParent function to accept a stripeCustomerId
+// Create a new parent with account ID
 export async function createParent(parentData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    emoji: string;
-    addressLine1: string;
-    addressLine2?: string;
-    subsurb: string;
-    city: string;
-    postCode: string;
-    country: string;
-    stripeCustomerId?: string; // Make this optional
-  }) {
-    const db = await getDb();
-    
-    // Only create Stripe customer if not already provided
-    let customerIdToUse = parentData.stripeCustomerId;
-    if (!customerIdToUse) {
-      // Create Stripe customer
-      const customer = await createStripeCustomer(
-        parentData.email, 
-        `${parentData.firstName} ${parentData.lastName}`
-      );
-      customerIdToUse = customer.id;
-    }
-    
-    // Insert parent into database
-    const result = await db.run(`
-      INSERT INTO parent (
-        firstName, lastName, email, password, emoji, stripeCustomerId,
-        addressLine1, addressLine2, subsurb, city, postCode, country
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      parentData.firstName,
-      parentData.lastName,
-      parentData.email,
-      parentData.password,
-      parentData.emoji,
-      customerIdToUse,
-      parentData.addressLine1,
-      parentData.addressLine2 || '',
-      parentData.subsurb,
-      parentData.city,
-      parentData.postCode,
-      parentData.country
-    ]);
-    
-    // Get the created parent
-    const parent = await db.get('SELECT * FROM parent WHERE id = ?', [result.lastID]);
-    return parent;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  emoji: string;
+  addressLine1: string;
+  addressLine2?: string;
+  subsurb: string;
+  city: string;
+  postCode: string;
+  country: string;
+  stripeCustomerId?: string;
+  accountId: number;
+}) {
+  const db = await getDb();
+  
+  // Get the Stripe account ID for the account
+  const account = await db.get('SELECT accountId FROM account WHERE id = ?', [parentData.accountId]);
+  
+  if (!account) {
+    throw new Error(`Account not found: ${parentData.accountId}`);
   }
+  
+  // Only create Stripe customer if not already provided
+  let customerIdToUse = parentData.stripeCustomerId;
+  if (!customerIdToUse) {
+    // Create Stripe customer with the account's Stripe ID
+    const customer = await createStripeCustomer(
+      parentData.email, 
+      `${parentData.firstName} ${parentData.lastName}`,
+      account.accountId
+    );
+    customerIdToUse = customer.id;
+  }
+  
+  // Insert parent into database
+  const result = await db.run(`
+    INSERT INTO parent (
+      firstName, lastName, email, password, emoji, stripeCustomerId,
+      addressLine1, addressLine2, subsurb, city, postCode, country, accountId
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    parentData.firstName,
+    parentData.lastName,
+    parentData.email,
+    parentData.password,
+    parentData.emoji,
+    customerIdToUse,
+    parentData.addressLine1,
+    parentData.addressLine2 || '',
+    parentData.subsurb,
+    parentData.city,
+    parentData.postCode,
+    parentData.country,
+    parentData.accountId
+  ]);
+  
+  // Get the created parent
+  const parent = await db.get('SELECT * FROM parent WHERE id = ?', [result.lastID]);
+  return parent;
+}
 
 // Create a new student for a parent
 export async function createStudent(studentData: {
@@ -105,17 +116,19 @@ export async function createStudent(studentData: {
   lastName: string;
   year: number;
   parentId: number;
+  accountId: number;
 }) {
   const db = await getDb();
   
   const result = await db.run(`
-    INSERT INTO student (firstName, lastName, year, parentID)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO student (firstName, lastName, year, parentID, accountId)
+    VALUES (?, ?, ?, ?, ?)
   `, [
     studentData.firstName,
     studentData.lastName,
     studentData.year,
-    studentData.parentId
+    studentData.parentId,
+    studentData.accountId
   ]);
   
   const student = await db.get('SELECT * FROM student WHERE id = ?', [result.lastID]);
@@ -137,25 +150,50 @@ export async function setParentPaymentMethod(parentId: number, paymentMethodId: 
 
 // Get parent by ID
 export async function getParentById(parentId: number) {
-    const db = await getDb();
-    return await db.get('SELECT * FROM parent WHERE id = ?', [parentId]);
-  }
+  const db = await getDb();
+  return await db.get('SELECT * FROM parent WHERE id = ?', [parentId]);
+}
+
+// Get parent by email and account ID
+export async function getParentByEmailAndAccount(email: string, accountId: number) {
+  const db = await getDb();
+  return await db.get('SELECT * FROM parent WHERE email = ? AND accountId = ?', [email, accountId]);
+}
+
+// Get staff by email and account ID
+export async function getStaffByEmailAndAccount(email: string, accountId: number) {
+  const db = await getDb();
+  return await db.get('SELECT * FROM staff WHERE email = ? AND accountId = ?', [email, accountId]);
+}
+
+// Get staff by ID
+export async function getStaffById(staffId: number) {
+  const db = await getDb();
+  return await db.get('SELECT * FROM staff WHERE id = ?', [staffId]);
+}
+
+// Create staff member
+export async function createStaffMember(staffData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  emoji: string;
+  accountId: number;
+}) {
+  const db = await getDb();
   
-  // Get parent by email
-  export async function getParentByEmail(email: string) {
-    const db = await getDb();
-    return await db.get('SELECT * FROM parent WHERE email = ?', [email]);
-  }
+  const result = await db.run(`
+    INSERT INTO staff (firstName, lastName, email, password, emoji, accountId)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `, [
+    staffData.firstName,
+    staffData.lastName,
+    staffData.email,
+    staffData.password,
+    staffData.emoji,
+    staffData.accountId
+  ]);
   
-  // Get staff by email
-  export async function getStaffByEmail(email: string) {
-    const db = await getDb();
-    return await db.get('SELECT * FROM staff WHERE email = ?', [email]);
-  }
-  
-  // Get staff by ID
-  export async function getStaffById(staffId: number) {
-    const db = await getDb();
-    return await db.get('SELECT * FROM staff WHERE id = ?', [staffId]);
-  }
-  
+  return await db.get('SELECT * FROM staff WHERE id = ?', [result.lastID]);
+}

@@ -1,4 +1,4 @@
-// pages/api/auth/parent-login.ts (continued)
+// pages/api/auth/parent-login.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { authenticateParent, generateToken, setAuthCookie } from '../../../lib/auth';
 
@@ -7,14 +7,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
-  const { email, password } = req.body;
+  const { email, password, accountId } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required' });
+  if (!email || !password || !accountId) {
+    return res.status(400).json({ success: false, message: 'Email, password, and account are required' });
   }
 
   try {
-    const parent = await authenticateParent(email, password);
+    const parent = await authenticateParent(email, password, accountId);
     
     if (!parent) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
@@ -33,7 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         firstName: parent.firstName,
         lastName: parent.lastName,
         email: parent.email,
-        emoji: parent.emoji
+        emoji: parent.emoji,
+        accountId: parent.accountId
       }
     });
   } catch (error) {
