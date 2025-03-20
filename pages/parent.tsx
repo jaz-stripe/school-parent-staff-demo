@@ -67,6 +67,8 @@ export default function ParentDetailPage() {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
+
+  const [createInvoice, setCreateInvoice] = useState(false);
   
   const router = useRouter();
   const { id } = router.query;
@@ -161,14 +163,17 @@ export default function ParentDetailPage() {
     }
     
     try {
-      setUpdateLoading(true);
-      setUpdateStatus('');
-      
-      const response = await fetch(`/api/staff/update-parent-items/${parent.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: selectedItems }),
-      });
+        setUpdateLoading(true);
+        setUpdateStatus('');
+        
+        const response = await fetch(`/api/staff/update-parent-items/${parent.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            items: selectedItems,
+            createInvoice 
+          }),
+        });
       
       const data = await response.json();
       
@@ -304,16 +309,19 @@ export default function ParentDetailPage() {
         </section>
         
         <ProductSelection
-          title="Parent Items"
-          products={parentItems}
-          selectedItems={selectedItems}
-          keyPrefix="parent"
-          onItemChange={handleItemChange}
-          onUpdate={handleUpdate}
-          updateButtonText="Add Selected Items"
-          status={updateStatus}
-          isLoading={updateLoading}
-          emptyMessage="No items available for parents"
+            title="Parent Items"
+            products={parentItems}
+            selectedItems={selectedItems}
+            keyPrefix="parent"
+            onItemChange={handleItemChange}
+            onUpdate={handleUpdate}
+            updateButtonText="Add Selected Items"
+            status={updateStatus}
+            isLoading={updateLoading}
+            emptyMessage="No items available for parents"
+            showCreateInvoiceOption={true}
+            createInvoiceChecked={createInvoice}
+            onCreateInvoiceChange={setCreateInvoice}
         />
         
         <section className={styles.subscriptionsSection}>

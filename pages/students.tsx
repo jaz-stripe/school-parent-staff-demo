@@ -36,6 +36,8 @@ export default function StudentsPage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
+
+  const [createInvoice, setCreateInvoice] = useState(false);
   
   const router = useRouter();
 
@@ -155,17 +157,18 @@ export default function StudentsPage() {
     }
     
     try {
-      setUpdating(true);
-      setUpdateStatus('');
-      
-      const response = await fetch('/api/staff/update-student-purchases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          studentIds: selectedStudents,
-          items: selectedItems 
-        }),
-      });
+        setUpdating(true);
+        setUpdateStatus('');
+        
+        const response = await fetch('/api/staff/update-student-purchases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            studentIds: selectedStudents,
+            items: selectedItems,
+            createInvoice 
+          }),
+        });
       
       const data = await response.json();
       
@@ -305,7 +308,10 @@ export default function StudentsPage() {
             status={updateStatus}
             isLoading={updating}
             emptyMessage="No student items available"
-          />
+            showCreateInvoiceOption={true}
+            createInvoiceChecked={createInvoice}
+            onCreateInvoiceChange={setCreateInvoice}
+        />
         )}
       </main>
     </div>

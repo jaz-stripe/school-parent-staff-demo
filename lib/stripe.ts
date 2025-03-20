@@ -569,3 +569,84 @@ return stripe.paymentIntents.list({
     expand: ['data.customer']
   })
 };
+
+/**
+ * Create a single invoice for a parent with multiple items
+ * @param customerId The Stripe customer ID
+ * @param items Array of product items with their quantities
+ * @param description Optional invoice description
+ * @returns The paid invoice and database records
+ */
+export async function createParentInvoice(
+  parentId: number,
+  customerId: string, 
+  invoiceItems: Array<{
+    productId: number,
+    stripePriceId: string,
+    studentId: number | null,
+    quantity: number,
+    description: string,
+    metadata: Record<string, string>
+  }>,
+  description?: string
+) {
+  try {
+    const db = await getDb();
+    
+    // 1. Create a single draft invoice
+    const invoice = await stripe.invoices.create({
+      customer: customerId,
+      collection_method: 'charge_automatically',
+      description: description || 'School items purchase',
+      auto_advance: false, // Don't finalize automatically yet
+    });
+    
+    console.log(`Created draft invoice ${invoice.id} for customer ${customerId}`);
+    
+    // 2. Add all items to this invoice
+    for (const item of invoiceItems) {
+      await stripe.invoiceItems.create({
+        customer: customerId,
+        invoice: invoice.id,
+        price: item.stripePriceId,
+        quantity: item.quantity,
+        description: item.description,
+        metadata: item.metadata
+      });
+      
+      console.log(`Added item ${item.stripePriceId} to invoice ${invoice.id}`);
+    }
+    
+    // 3. Finalize the invoice
+    const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id);
+    console.log(`Finalized invoice ${finalizedInvoice.id} for customer ${customerId}`);
+    
+    // 4. Pay the invoice
+    const paidInvoice = await stripe.invoices.pay(finalizedInvoice.id);
+    console.log(`Paid invoice ${paidInvoice.id} for customer ${customerId}`);
+    
+    // 5. Record all purchases in our database
+    const purchaseRecords = [];
+    
+    for (const item of invoiceItems) {
+      const purchaseRecord = await recordParentPurchase(
+        parentId,
+        item.productId,
+        item.studentId,
+        paidInvoice.id, // Use the same invoice ID for all items
+        item.description
+      );
+      
+      purchaseRecords.push(purchaseRecord);
+    }
+    
+    return {
+      invoice: paidInvoice,
+      purchases: purchaseRecords
+    };
+    
+  } catch (error) {
+    console.error(`Error creating invoice for customer ${customerId}:`, error);
+    throw error;
+  }
+}

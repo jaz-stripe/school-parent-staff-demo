@@ -20,6 +20,9 @@ interface ProductSelectionProps {
   status?: string;
   isLoading?: boolean;
   emptyMessage?: string;
+  showCreateInvoiceOption?: boolean;
+  createInvoiceChecked?: boolean;
+  onCreateInvoiceChange?: (checked: boolean) => void;
 }
 
 const ProductSelection: React.FC<ProductSelectionProps> = ({
@@ -32,7 +35,10 @@ const ProductSelection: React.FC<ProductSelectionProps> = ({
   updateButtonText = "Update",
   status,
   isLoading = false,
-  emptyMessage = "No products available"
+  emptyMessage = "No products available",
+  showCreateInvoiceOption = false,
+  createInvoiceChecked = false,
+  onCreateInvoiceChange
 }) => {
   const selectedCount = Object.values(selectedItems).reduce((sum, count) => sum + count, 0);
   const hasSelections = selectedCount > 0;
@@ -85,6 +91,20 @@ const ProductSelection: React.FC<ProductSelectionProps> = ({
       
       {hasSelections && onUpdate && (
         <div className={styles.updateSection}>
+          {showCreateInvoiceOption && (
+            <div className={styles.invoiceOption}>
+              <label className={styles.invoiceCheckboxLabel}>
+                <input 
+                  type="checkbox"
+                  checked={createInvoiceChecked}
+                  onChange={(e) => onCreateInvoiceChange && onCreateInvoiceChange(e.target.checked)}
+                  className={styles.invoiceCheckbox}
+                />
+                Create invoice now and charge payment method
+              </label>
+            </div>
+          )}
+          
           <button
             onClick={onUpdate}
             className={styles.updateButton}

@@ -34,6 +34,8 @@ export default function ParentsPage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
+
+  const [createInvoice, setCreateInvoice] = useState(false);
   
   const router = useRouter();
 
@@ -148,17 +150,18 @@ export default function ParentsPage() {
     }
     
     try {
-      setUpdating(true);
-      setUpdateStatus('');
-      
-      const response = await fetch('/api/staff/update-parent-purchases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          parentIds: selectedParents,
-          items: selectedItems 
-        }),
-      });
+        setUpdating(true);
+        setUpdateStatus('');
+        
+        const response = await fetch('/api/staff/update-parent-purchases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            parentIds: selectedParents,
+            items: selectedItems,
+            createInvoice 
+          }),
+        });
       
       const data = await response.json();
       
@@ -282,7 +285,10 @@ export default function ParentsPage() {
             status={updateStatus}
             isLoading={updating}
             emptyMessage="No parent items available"
-          />
+            showCreateInvoiceOption={true}
+            createInvoiceChecked={createInvoice}
+            onCreateInvoiceChange={setCreateInvoice}
+        />
         )}
       </main>
     </div>

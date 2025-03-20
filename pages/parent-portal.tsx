@@ -37,7 +37,8 @@ export default function ParentPortal() {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
   const [updateStatus, setUpdateStatus] = useState('');
-  
+  const [createInvoice, setCreateInvoice] = useState(false);
+
   const router = useRouter();
 
   // Fetch parent profile, students, and available items
@@ -113,32 +114,39 @@ export default function ParentPortal() {
   };
 
   const handleUpdate = async () => {
-    try {
-      setUpdateLoading(true);
-      setUpdateStatus('Updating...');
-      
-      const response = await fetch('/api/parent/update-purchases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: selectedItems }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setUpdateStatus('Items updated successfully!');
-        setSelectedItems({});
-        setTimeout(() => setUpdateStatus(''), 3000);
-      } else {
-        setUpdateStatus('Failed to update items: ' + (data.message || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error updating purchases:', error);
-      setUpdateStatus('An error occurred while updating items');
-    } finally {
-      setUpdateLoading(false);
-    }
-  };
+        try {
+            setUpdateLoading(true);
+            setUpdateStatus('Updating...');
+            
+            const response = await fetch('/api/parent/update-purchases', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                items: selectedItems,
+                createInvoice 
+            }),
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+            setUpdateStatus(createInvoice ? 
+                'Items added and invoiced successfully!' : 
+                'Items updated successfully!'
+            );
+            setSelectedItems({});
+            setTimeout(() => setUpdateStatus(''), 3000);
+            } else {
+            setUpdateStatus('Failed to update items: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error updating purchases:', error);
+            setUpdateStatus('An error occurred while updating items');
+        } finally {
+            setUpdateLoading(false);
+        }
+    };
+
 
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
@@ -186,16 +194,19 @@ export default function ParentPortal() {
         </section>
         
         <ProductSelection
-          title="Items for Parents"
-          products={parentItems}
-          selectedItems={selectedItems}
-          keyPrefix="parent"
-          onItemChange={handleItemChange}
-          onUpdate={handleUpdate}
-          updateButtonText="Update Purchases"
-          status={updateStatus}
-          isLoading={updateLoading}
-          emptyMessage="No items available for parents"
+            title="Items for Parents"
+            products={parentItems}
+            selectedItems={selectedItems}
+            keyPrefix="parent"
+            onItemChange={handleItemChange}
+            onUpdate={handleUpdate}
+            updateButtonText="Update Purchases"
+            status={updateStatus}
+            isLoading={updateLoading}
+            emptyMessage="No items available for parents"
+            showCreateInvoiceOption={true}
+            createInvoiceChecked={createInvoice}
+            onCreateInvoiceChange={setCreateInvoice}
         />
         
         <div className={styles.portalLinkContainer}>
